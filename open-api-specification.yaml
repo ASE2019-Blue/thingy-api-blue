@@ -1,0 +1,73 @@
+openapi: 3.0.0
+info:
+  title: Thingy API
+  version: '1.0-dev'
+servers:
+  - url: 'http://localhost:3000/'
+security:
+  - basicAuth: []
+paths:
+  /users/sign-up:
+    post:
+      summary: Register a new user
+      requestBody:
+        description: User that needs to be registered
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    UserDto:
+      type: object
+      required:
+        - username
+        - password
+        - firstName
+        - lastName
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+    User:
+      type: object
+      required:
+        - id
+        - username
+        - firstName
+        - lastName
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        modifiedAt:
+          type: string
+          format: date-time
