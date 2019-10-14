@@ -7,6 +7,25 @@ servers:
 security:
   - basicAuth: []
 paths:
+  /auth/token:
+    post:
+      summary: Generate an authentication token
+      requestBody:
+        description: Username and password of user to create token for
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationToken'
+        '400':
+          description: Invalid input
   /users/sign-up:
     post:
       summary: Register a new user
@@ -33,6 +52,23 @@ components:
       type: http
       scheme: basic
   schemas:
+    AuthenticationToken:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    UserCredentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
     UserDto:
       type: object
       required:
