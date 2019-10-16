@@ -3,6 +3,8 @@ const router = new Router();
 
 const Ctrl = require('../controllers/user-controller');
 
-router.post('/sign-up', Ctrl.signUp);
+router.get('/', Ctrl.findAll)
+    .get('/:username', Ctrl.findOne)
+    .post('/sign-up', Ctrl.signUp);
 
 module.exports = router.routes();
