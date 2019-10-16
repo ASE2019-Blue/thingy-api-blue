@@ -26,6 +26,37 @@ paths:
                 $ref: '#/components/schemas/AuthenticationToken'
         '400':
           description: Invalid input
+  /users:
+    get:
+      summary: Get a list of users
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfileShort'
+  /users/{username}:
+    get:
+      summary: Get the full user profile of a single user
+      parameters:
+          - name: username
+            in: path
+            description: Username of the user
+            required: true
+            schema:
+              type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileFull'
+        '404':
+          description: User not found
   /users/sign-up:
     post:
       summary: Register a new user
@@ -74,8 +105,6 @@ components:
       required:
         - username
         - password
-        - firstName
-        - lastName
       properties:
         username:
           type: string
@@ -90,16 +119,10 @@ components:
       required:
         - id
         - username
-        - firstName
-        - lastName
       properties:
         id:
           type: string
         username:
-          type: string
-        firstName:
-          type: string
-        lastName:
           type: string
         createdAt:
           type: string
@@ -107,3 +130,24 @@ components:
         modifiedAt:
           type: string
           format: date-time
+    UserProfileShort:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    UserProfileFull:
+      allOf:
+        - $ref: '#/components/schemas/UserProfileShort'
+        - type: object
+          required:
+            - username
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
