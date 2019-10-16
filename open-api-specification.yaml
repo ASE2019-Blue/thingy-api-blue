@@ -57,7 +57,7 @@ paths:
                 $ref: '#/components/schemas/UserProfileFull'
         '404':
           description: User not found
-  /users/sign-up:
+  /sign-up:
     post:
       summary: Register a new user
       requestBody:
