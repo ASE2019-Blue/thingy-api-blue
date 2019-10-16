@@ -18,45 +18,15 @@ paths:
             schema:
               $ref: '#/components/schemas/UserCredentials'
       responses:
-        '200':
+        200:
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthenticationToken'
-        '400':
+        400:
           description: Invalid input
-  /users:
-    get:
-      summary: Get a list of users
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserProfileShort'
-  /users/{username}:
-    get:
-      summary: Get the full user profile of a single user
-      parameters:
-          - name: username
-            in: path
-            description: Username of the user
-            required: true
-            schema:
-              type: string
-      responses:
-        '200':
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserProfileFull'
-        '404':
-          description: User not found
+
   /sign-up:
     post:
       summary: Register a new user
@@ -68,14 +38,75 @@ paths:
             schema:
               $ref: '#/components/schemas/UserDto'
       responses:
-        '200':
+        200:
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-        '400':
+        400:
           description: Invalid input
+
+  /thingys:
+    get:
+      summary: Get a list of thingys
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Thingy'
+
+  /thingys/{id}/lock:
+    post:
+      summary: Lock thingy to current user
+      responses:
+        200:
+          description: Success
+        404:
+          description: Thingy not found
+
+    delete:
+      summary: Remove lock for a thingy for the current user
+      responses:
+        200:
+          description: Success
+
+  /users:
+    get:
+      summary: Get a list of users
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfileShort'
+
+  /users/{username}:
+    get:
+      summary: Get the full user profile of a single user
+      parameters:
+          - name: username
+            in: path
+            description: Username of the user
+            required: true
+            schema:
+              type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileFull'
+        404:
+          description: User not found
 
 components:
   securitySchemes:
@@ -90,6 +121,20 @@ components:
       properties:
         token:
           type: string
+    Thingy:
+      type: object
+      required:
+        - _id
+        - macAddress
+        - lockedForUser
+      properties:
+        _id:
+          type: string
+        macAddress:
+          type: string
+        lockedForUser:
+          type: string
+          nullable: true
     UserCredentials:
       type: object
       required:
@@ -117,7 +162,7 @@ components:
     User:
       type: object
       required:
-        - id
+        - _id
         - username
       properties:
         id:
