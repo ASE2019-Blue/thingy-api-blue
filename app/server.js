@@ -21,7 +21,7 @@ app.use(BodyParser({
 app.use(Jwt({ secret: process.env.SECRET }).unless({ path: [
     // Whitelist routes that don't require authentication
     /^\/auth/,
-    /^\/users\/sign-up/
+    /^\/sign-up/
     ]
 }));
 
