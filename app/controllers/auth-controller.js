@@ -23,7 +23,7 @@ async function createToken(ctx, next) {
         ctx.throw(400, 'Invalid request');
     }
 
-    const token = jwt.sign({ username: user.username, name: user.firstName + ' ' + user.lastName }, process.env.SECRET);
+    const token = jwt.sign({ username: user.username }, process.env.SECRET);
 
     ctx.body = { token: token }
 }

@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user-model');
 
 /**
@@ -29,7 +30,8 @@ async function signUp(ctx, next) {
         ctx.throw(400, err);
     }
 
-    ctx.body = await User.find({username: user.username});
+    const token = jwt.sign({ username: user.username }, process.env.SECRET);
+    ctx.body = { token: token }
 }
 
 module.exports = {

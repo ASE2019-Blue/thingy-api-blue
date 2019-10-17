@@ -43,7 +43,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/AuthenticationToken'
         400:
           description: Invalid input
 
@@ -162,26 +162,6 @@ components:
           type: string
         password:
           type: string
-        firstName:
-          type: string
-        lastName:
-          type: string
-    User:
-      type: object
-      required:
-        - _id
-        - username
-      properties:
-        id:
-          type: string
-        username:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        modifiedAt:
-          type: string
-          format: date-time
     UserProfileShort:
       type: object
       required:
