@@ -60,9 +60,16 @@ paths:
                 items:
                   $ref: '#/components/schemas/Thingy'
 
-  /thingys/{id}/lock:
+  /thingys/{thingyId}/lock:
     post:
       summary: Lock thingy to current user
+      parameters:
+        - name: thingyId
+          in: path
+          description: Id of the thingy
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Success
