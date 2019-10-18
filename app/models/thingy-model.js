@@ -5,6 +5,10 @@ const ThingySchema = new mongoose.Schema({
             type: String,
             required: true
         },
+        lockedForUser: {
+            type: String,
+            ref: 'User',
+        },
     }, {
         timestamps: true
 });
