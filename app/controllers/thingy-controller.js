@@ -1,9 +1,5 @@
 const Thingy = require('../models/thingy-model');
 
-const LOCK_STATE_OK = 'Ok';
-const LOCK_STATE_ALREADY_LOCKED = 'Thingy already locked';
-const LOCK_STATE_INVALID = 'Invalid request';
-
 /**
  * Find all thingys.
  *
@@ -32,25 +28,11 @@ async function lock(ctx, next) {
     // TODO Validate user input
     const thingyId = ctx.params.thingyId;
     const username = ctx.state.user.username;
-    let state = LOCK_STATE_INVALID;
 
-    await Thingy.findOneAndUpdate(
-        { _id: thingyId, lockedForUser: null },
-        { lockedForUser: username },
-        {},
-        function(error, results) {
-            console.log({error: error, results: results});
-            if (results === null) {
-                state = LOCK_STATE_ALREADY_LOCKED;
-            } else if (error !== null) {
-                state = LOCK_STATE_INVALID;
-            } else {
-                state = LOCK_STATE_OK;
-            }
-        });
+    let thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
 
-    if (state !== LOCK_STATE_OK) {
-        ctx.throw(400, state);
+    if (null === thingy) {
+        ctx.throw(400, 'Invalid request');
     }
     ctx.status = 200;
 }
@@ -67,10 +49,9 @@ async function unlock(ctx, next) {
     const thingyId = ctx.params.thingyId;
     const username = ctx.state.user.username;
 
-    try {
-        await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
-    } catch (e) {
-        // TODO Add better exception handling: Thingy not found, thingy already locked
+    let thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
+
+    if (null === thingy) {
         ctx.throw(400, 'Invalid request');
     }
     ctx.status = 200;
