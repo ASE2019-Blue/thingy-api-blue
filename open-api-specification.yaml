@@ -27,6 +27,19 @@ paths:
         400:
           description: Invalid input
 
+  /games:
+    get:
+      summary: Get list of games
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+
   /sign-up:
     post:
       summary: Register a new user
@@ -134,6 +147,22 @@ components:
         - token
       properties:
         token:
+          type: string
+    Game:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - icon
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
           type: string
     Thingy:
       type: object
