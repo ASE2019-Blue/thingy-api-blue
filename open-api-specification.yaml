@@ -42,6 +42,29 @@ paths:
                 items:
                   $ref: '#/components/schemas/Game'
 
+  /games/{gameKey}/matches:
+    post:
+      summary: Create a new match
+      tags: ['Games']
+      parameters:
+        - name: gameKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Config
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchDto'
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
   /sign-up:
     post:
       summary: Sign up a new user
@@ -156,6 +179,57 @@ components:
       properties:
         token:
           type: string
+    Match:
+      allOf:
+        - $ref: '#/components/schemas/MatchDto'
+        - type: object
+          required:
+            - _id
+            - gameKey
+            - state
+            - owner
+            - thingy
+            - createdAt
+            - modifiedAt
+          properties:
+            _id:
+              type: string
+            gameKey:
+              type: string
+              enum:
+                - tap-game
+                - hide-and-seek
+            state:
+              type: string
+              enum:
+                - running
+                - finished
+            owner:
+              type: string
+            thingys:
+              type: array
+              items:
+                type: string
+                description: Thingy id
+            createdAt:
+              type: string
+              format: datetime
+            modifedAt:
+              type: string
+              format: datetime
+    MatchDto:
+      type: object
+      required:
+        - config
+        - thingys
+      properties:
+        config:
+          type: object
+        thingys:
+          type: array
+          items:
+            type: string
+            description: Thingy id
     Game:
       type: object
       required:
