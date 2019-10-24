@@ -1,9 +1,35 @@
 const mongoose = require('mongoose');
+const Game = require('../models/game-model');
+
+const STATE_RUNNING = 'running';
+const STATE_FINISHED = 'finished';
+
+const MATCH_STATES = [STATE_RUNNING, STATE_FINISHED];
 
 const MatchSchema = new mongoose.Schema({
-        game: {
+        gameKey: {
+            type: String,
+            required: true,
+            enum: Game.GAME_KEYS
+        },
+        config: {
+            type: Object,
+            required: true,
+        },
+        state: {
+            type: String,
+            required: true,
+            enum: MATCH_STATES,
+            default: STATE_RUNNING
+        },
+        thingys: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Game',
+            ref: 'Thingy',
+            required: true
+        }],
+        owner: {
+            type: String,
+            ref: 'User',
             required: true
         },
     }, {

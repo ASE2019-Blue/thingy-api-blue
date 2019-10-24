@@ -20,16 +20,32 @@ async function findAll(ctx, next) {
  * @returns {Promise<void>}
  */
 async function addMatch(ctx, next) {
-    const gameId = ctx.params['gameId'];
+    const gameKey = ctx.params['gameKey'];
 
-    const game = await Game.findById(gameId);
-    if (!game) ctx.throw(404, {'error': 'Game not found'});
+    if (!Game.GAME_KEYS.includes(gameKey)) {
+        ctx.throw(404, {'error': 'Game not found'});
+    }
 
+    // TODO Validate input (thingys, config, only one match per user at the same time)
+    const matchDto = ctx.request.body;
+
+    if (typeof matchDto.config == "undefined") {
+        ctx.throw(400, {'error': 'You need to provide a config for the match'});
+    }
+
+    if (typeof matchDto.thingys == "undefined") {
+        ctx.throw(418, {'error': 'You need to provide a list of thingys to use for the match'});
+    }
+
+    const username = ctx.state.user.username;
     const match = new Match();
-    match.game = gameId;
+    match.gameKey = gameKey;
+    match.owner = username;
+    match.config = matchDto.config;
+    match.thingys = matchDto.thingys;
 
     await match.save();
-    ctx.body = await match.populate('game').execPopulate();
+    ctx.body = match;
 }
 
 module.exports = {
