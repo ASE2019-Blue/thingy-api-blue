@@ -1,5 +1,6 @@
 const Game = require('../models/game-model');
 const Match = require('../models/match-model');
+const Utilities = require('../services/utility-service');
 
 /**
  * Find all games.
@@ -9,6 +10,9 @@ const Match = require('../models/match-model');
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
+    // Add some latency for better async testing
+    // TODO Remove after development
+    await Utilities.sleep(800);
     ctx.body = Game.GAMES;
 }
 
@@ -34,7 +38,7 @@ async function addMatch(ctx, next) {
     }
 
     if (typeof matchDto.thingys == "undefined") {
-        ctx.throw(418, {'error': 'You need to provide a list of thingys to use for the match'});
+        ctx.throw(400, {'error': 'You need to provide a list of thingys to use for the match'});
     }
 
     const username = ctx.state.user.username;
