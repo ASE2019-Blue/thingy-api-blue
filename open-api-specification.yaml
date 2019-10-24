@@ -10,6 +10,7 @@ paths:
   /auth/token:
     post:
       summary: Generate an authentication token
+      tags: ['Authentication']
       requestBody:
         description: Username and password of user to create token for
         required: true
@@ -30,6 +31,7 @@ paths:
   /games:
     get:
       summary: Get list of games
+      tags: ['Games']
       responses:
         200:
           description: Successful opeation
@@ -42,7 +44,8 @@ paths:
 
   /sign-up:
     post:
-      summary: Register a new user
+      summary: Sign up a new user
+      tags: ['Authentication']
       requestBody:
         description: User that needs to be registered
         required: true
@@ -63,6 +66,7 @@ paths:
   /thingys:
     get:
       summary: Get a list of thingys
+      tags: ['Thingys']
       responses:
         200:
           description: Success
@@ -76,6 +80,7 @@ paths:
   /thingys/{thingyId}/lock:
     post:
       summary: Lock thingy to current user
+      tags: ['Thingys']
       parameters:
         - name: thingyId
           in: path
@@ -91,6 +96,7 @@ paths:
 
     delete:
       summary: Remove lock for a thingy for the current user
+      tags: ['Thingys']
       parameters:
         - name: thingyId
           in: path
@@ -105,6 +111,7 @@ paths:
   /users:
     get:
       summary: Get a list of users
+      tags: ['Users']
       responses:
         200:
           description: Success
@@ -118,13 +125,14 @@ paths:
   /users/{username}:
     get:
       summary: Get the full user profile of a single user
+      tags: ['Users']
       parameters:
-          - name: username
-            in: path
-            description: Username of the user
-            required: true
-            schema:
-              type: string
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Success
