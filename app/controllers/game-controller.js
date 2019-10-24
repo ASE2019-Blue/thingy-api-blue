@@ -9,29 +9,7 @@ const Match = require('../models/match-model');
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    ctx.body = await Game.find({});
-}
-
-/**
- * Add a new game.
- *
- * @param ctx
- * @param next
- * @returns {Promise<void>}
- */
-async function add(ctx, next) {
-    let game = new Game();
-
-    // Validate input
-    // TODO Replace with validation framework
-    const gameDto = ctx.request.body;
-    if (!gameDto.title) ctx.throw(400, {'error': '"title" is a required field'});
-
-    game.title = gameDto.title;
-
-    await game.save();
-
-    ctx.body = game;
+    ctx.body = Game.GAMES;
 }
 
 /**
@@ -56,6 +34,5 @@ async function addMatch(ctx, next) {
 
 module.exports = {
     findAll,
-    add,
     addMatch
 };
