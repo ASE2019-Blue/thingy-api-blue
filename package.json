@@ -4,7 +4,8 @@
   "description": "Thingy API of team blue",
   "main": "app/index.js",
   "scripts": {
-    "start": "nodemon app/index.js"
+    "server": "nodemon app/index.js",
+    "start": "echo 'This script is deprecated. Use `npm run server` instead.'"
   },
   "keywords": [
     "rest",
