@@ -4,6 +4,6 @@ const router = new Router();
 const Ctrl = require('../controllers/game-controller');
 
 router.get('/', Ctrl.findAll)
-    .post('/:gameId/matches', Ctrl.addMatch);
+    .post('/:gameKey/matches', Ctrl.addMatch);
 
 module.exports = router.routes();
