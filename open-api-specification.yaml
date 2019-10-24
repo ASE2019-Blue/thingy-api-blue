@@ -78,6 +78,13 @@ paths:
 
     delete:
       summary: Remove lock for a thingy for the current user
+      parameters:
+        - name: thingyId
+          in: path
+          description: Id of the thingy
+          required: true
+          schema:
+            type: string
       responses:
         200:
           description: Success
