@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 
@@ -41,7 +42,44 @@ async function findOne(ctx, next) {
     ctx.body = user;
 }
 
+/**
+ * Change the password of the currently logged in user.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function changePassword(ctx, next) {
+    const username = ctx.params.username;
+    const usernameOfLoggedInUser = ctx.state.user.username;
+    const newPasswordDto = ctx.request.body;
+
+    if (username !== usernameOfLoggedInUser) {
+        ctx.throw(400, 'You can not change the password of someone else');
+    }
+
+    const user = await User.findOne({username: username});
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    if (typeof newPasswordDto.currentPassword === "undefined" || typeof newPasswordDto.newPassword === "undefined") {
+        ctx.throw(400, 'You need to provide the current and the new password');
+    }
+
+    const match = await bcrypt.compare(newPasswordDto.currentPassword, user.hash);
+    if (!match) {
+        ctx.throw(400, 'The provided password does not match the current password');
+    }
+
+    user.hash = await bcrypt.hash(newPasswordDto.newPassword, 12);
+    await user.save();
+
+    ctx.status = 200;
+}
+
 module.exports = {
     findAll,
     findOne,
+    changePassword
 };

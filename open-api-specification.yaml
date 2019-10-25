@@ -166,6 +166,32 @@ paths:
         404:
           description: User not found
 
+  /users/{username}/password:
+    put:
+      summary: Change the password of the current user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Current and new password
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordDto'
+      responses:
+        200:
+          description: Success
+        400:
+          description: Invalid request
+        404:
+          description: User not found
+
 components:
   securitySchemes:
     basicAuth:
@@ -230,6 +256,16 @@ components:
           items:
             type: string
             description: Thingy id
+    NewPasswordDto:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
     Game:
       type: object
       required:
