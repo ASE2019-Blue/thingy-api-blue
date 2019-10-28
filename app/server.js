@@ -5,6 +5,7 @@ const Cors = require('@koa/cors');
 const BodyParser = require('koa-bodyparser');
 const Helmet = require('koa-helmet');
 const Database = require('./db');
+const Mqtt = require('./mqtt');
 
 const app = new Koa();
 const router = new Router();
