@@ -18,8 +18,8 @@ async function signUp(ctx, next) {
         const hash = await bcrypt.hash(userDto.password, 12);
         user._id = userDto.username;
         user.username = userDto.username;
-        user.firstName = userDto.firstName;
-        user.lastName = userDto.lastName;
+        user.firstName = userDto.firstName != null ? userDto.firstName : "";
+        user.lastName = userDto.lastName != null ? userDto.firstName : "";
         user.hash = hash;
 
         await user.save();
