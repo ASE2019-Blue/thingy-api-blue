@@ -40,15 +40,17 @@ async function startMatch(ctx, next) {
         ctx.throw(404, {'error': 'Game not found'});
     }
 
+    let updatedMatch = await Match.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED}, { state: Match.STATE_RUNNING });
     
     //For each game add a test on gameKey and launch the corresponding one
+    //Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
     if(gameKey == Game.TAP_GAME){
         Tapgame.start(match)
     }
     if(gameKey == Game.HIDE_AND_SEEK){
     	//Hideandseek.start(match)
     }
-    let updatedMatch = await Match.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED}, { state: Match.STATE_RUNNING });
+    
     
     ctx.body = updatedMatch;
 }
