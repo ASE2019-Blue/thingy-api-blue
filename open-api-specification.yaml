@@ -30,7 +30,28 @@ paths:
 
   /demo:
     post:
-      summary: Changes color of Thingy LED to random color
+      summary: Starts the demo for sprint 1
+      tags: ['Demo']
+      requestBody:
+        description: None
+        required: false
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Invalid input
+          
+  /demo/end:
+    post:
+      summary: Stops the demo for sprint 1
       tags: ['Demo']
       requestBody:
         description: None
