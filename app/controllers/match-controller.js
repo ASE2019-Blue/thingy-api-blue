@@ -44,10 +44,10 @@ async function startMatch(ctx, next) {
     
     //For each game add a test on gameKey and launch the corresponding one
     //Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
-    if(gameKey == Game.TAP_GAME){
+    if(gameKey === Game.TAP_GAME){
         Tapgame.start(match)
     }
-    if(gameKey == Game.HIDE_AND_SEEK){
+    if(gameKey === Game.HIDE_AND_SEEK){
     	//Hideandseek.start(match)
     }
     
