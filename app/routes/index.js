@@ -5,4 +5,6 @@ module.exports = (router) => {
     router.use('/sign-up', require('./signup-routes'));
     router.use('/thingys', require('./thingy-routes'));
     router.use('/users', require('./user-routes'));
+    router.use('/matches', require('./match-routes'));
+    router.use('/demo', require('./demo-routes'));
 };

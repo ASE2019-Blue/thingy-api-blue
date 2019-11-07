@@ -1,7 +1,6 @@
 const Game = require('../models/game-model');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
-
 /**
  * Find all games.
  *
@@ -51,6 +50,7 @@ async function addMatch(ctx, next) {
     await match.save();
     ctx.body = match;
 }
+
 
 module.exports = {
     findAll,

@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const Game = require('../models/game-model');
 
+const STATE_CREATED = 'created';
 const STATE_RUNNING = 'running';
 const STATE_FINISHED = 'finished';
 
-const MATCH_STATES = [STATE_RUNNING, STATE_FINISHED];
+const MATCH_STATES = [STATE_CREATED, STATE_RUNNING, STATE_FINISHED];
 
 const MatchSchema = new mongoose.Schema({
         gameKey: {
@@ -20,7 +21,7 @@ const MatchSchema = new mongoose.Schema({
             type: String,
             required: true,
             enum: MATCH_STATES,
-            default: STATE_RUNNING
+            default: STATE_CREATED
         },
         thingys: [{
             type: mongoose.Schema.Types.ObjectId,
