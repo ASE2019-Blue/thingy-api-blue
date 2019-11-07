@@ -1,0 +1,360 @@
+openapi: 3.0.0
+info:
+  title: Thingy API
+  version: '1.0.0'
+servers:
+  - url: 'http://localhost:3000/'
+security:
+  - basicAuth: []
+paths:
+  /auth/token:
+    post:
+      summary: Generate an authentication token
+      tags: ['Authentication']
+      requestBody:
+        description: Username and password of user to create token for
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationToken'
+        400:
+          description: Invalid input
+
+  /demo:
+    post:
+      summary: Changes color of Thingy LED to random color
+      tags: ['Demo']
+      requestBody:
+        description: None
+        required: false
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: string
+        400:
+          description: Invalid input
+
+  /games:
+    get:
+      summary: Get list of games
+      tags: ['Games']
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+
+  /games/{gameKey}/matches:
+    post:
+      summary: Create a new match
+      tags: ['Games']
+      parameters:
+        - name: gameKey
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Config
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MatchDto'
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
+  /sign-up:
+    post:
+      summary: Sign up a new user
+      tags: ['Authentication']
+      requestBody:
+        description: User that needs to be registered
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationToken'
+        400:
+          description: Invalid input
+
+  /thingys:
+    get:
+      summary: Get a list of thingys
+      tags: ['Thingys']
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Thingy'
+
+  /thingys/{thingyId}/lock:
+    post:
+      summary: Lock thingy to current user
+      tags: ['Thingys']
+      parameters:
+        - name: thingyId
+          in: path
+          description: Id of the thingy
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+        404:
+          description: Thingy not found
+
+    delete:
+      summary: Remove lock for a thingy for the current user
+      tags: ['Thingys']
+      parameters:
+        - name: thingyId
+          in: path
+          description: Id of the thingy
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+
+  /users:
+    get:
+      summary: Get a list of users
+      tags: ['Users']
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserProfileShort'
+
+  /users/{username}:
+    get:
+      summary: Get the full user profile of a single user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfileFull'
+        404:
+          description: User not found
+
+  /users/{username}/password:
+    put:
+      summary: Change the password of the current user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Current and new password
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordDto'
+      responses:
+        200:
+          description: Success
+        400:
+          description: Invalid request
+        404:
+          description: User not found
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    AuthenticationToken:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+    Match:
+      allOf:
+        - $ref: '#/components/schemas/MatchDto'
+        - type: object
+          required:
+            - _id
+            - gameKey
+            - state
+            - owner
+            - thingy
+            - createdAt
+            - modifiedAt
+          properties:
+            _id:
+              type: string
+            gameKey:
+              type: string
+              enum:
+                - tap-game
+                - hide-and-seek
+            state:
+              type: string
+              enum:
+                - running
+                - finished
+            owner:
+              type: string
+            thingys:
+              type: array
+              items:
+                type: string
+                description: Thingy id
+            createdAt:
+              type: string
+              format: datetime
+            modifedAt:
+              type: string
+              format: datetime
+    MatchDto:
+      type: object
+      required:
+        - config
+        - thingys
+      properties:
+        config:
+          type: object
+        thingys:
+          type: array
+          items:
+            type: string
+            description: Thingy id
+    NewPasswordDto:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          type: string
+    Game:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - icon
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+    Thingy:
+      type: object
+      required:
+        - _id
+        - macAddress
+        - lockedForUser
+      properties:
+        _id:
+          type: string
+        macAddress:
+          type: string
+        lockedForUser:
+          type: string
+          nullable: true
+    UserCredentials:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserDto:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    UserProfileShort:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    UserProfileFull:
+      allOf:
+        - $ref: '#/components/schemas/UserProfileShort'
+        - type: object
+          required:
+            - username
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
