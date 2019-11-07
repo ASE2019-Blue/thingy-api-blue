@@ -24,8 +24,6 @@ function shuffle(a) {
     return a;
 }
 
-
-
 /**
  * Start a match.
  *
@@ -40,27 +38,17 @@ async function start(match){
 		//map of players with their color so we can attribute points not to color but to player at the end
 		//number of turn
 
-
 	const client  = mqtt.connect({
     	host: process.env.MQTT_BROKER_HOST,
     	port: process.env.MQTT_BROKER_PORT,
     	username: process.env.MQTT_BROKER_USER,
     	password: process.env.MQTT_BROKER_PASSWORD
 	});
-	console.log('connected to mqtt broker');
 
-	//For development purpose only: take the thingy uri from the web bluetooth API
-	let thingyURI = 'y1GdfbjQ0vc5TFjbI0mQAg';
-
-	//As a test change led color to red
-	client.publish(
-		//topic
-		thingyURI + '/' + configThingy.config.services.userInterface
-		+ '/' + configThingy.config.characteristics.led.UUID + '/Set',
-		//message
-		configThingy.colors.red
-	);
-
+	//For development purpose only: hardcoded MAC
+	let thingyURI = 'e3:af:9b:f4:a1:c7';
+	const buttonSubscription = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.button;
+	const ledPublish = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.led + '/Set';
 
 	//array of selected colors by the client
 	//const colors = match.config.colors;
@@ -83,54 +71,56 @@ async function start(match){
 	for (var i = nbTurns - 1; i >= 0; i--) {
 		randomColors.push(...colors);
 	}
-	console.log(randomColors);
 	//shuffle the array
 	shuffle(randomColors);
-	console.log(randomColors);
-	//when the color is randomly selected, remove it from the array
 	//-----------------END OF CONFIG------------------------
 
 
 	//-----------------GAME START HERE----------------------
-	//Wait (3+2)=5 seconds to let people get ready
-	await Utilities.sleep(3000);
+	//Wait 5 seconds to let people get ready
+	await Utilities.sleep(5000);
 
-	do{
-		await Utilities.sleep(2000);
-		//A timer begins as soon as the color is displayed (this timer could be seen on the client?)
-		let choosenColor = randomColors.pop();
-		client.publish(
-			//topic
-			thingyURI + '/' + configThingy.config.services.userInterface
-			+ '/' + configThingy.config.characteristics.led.UUID + '/Set',
-			//message
-			choosenColor
-		);
-		const time = process.hrtime();
+	var _waiting = false;
+	client.subscribe(buttonSubscription)
 
-//HERE NEED REVIEW ON HOW WE CAN CODE TO WAIT FOR A BUTTON TO BE PUSHED BEFORE CONTINUING AND TO CHECK POINTS AND TIMER
-		//We then wait someone to push the button on the thingy
-		await client.on(configThingy.config.characteristics.button.UUID, async function(){
+	//We then wait someone to push the button on the thingy
+	client.on('message', async function (topic, message) {
+
+		if(topic==buttonSubscription && _waiting){
+			_waiting = false;
 			//we create points related with the timer and add it to the user who push the button
 			//calcul for points : 100000 divided by time taken to push the button in milliseconds
-			const diff = process.hrtime(time);
+			const diff = process.hrtime(_time);
 			const timeInMilliseconds = (diff[0] * NS_PER_SEC + diff[1])  * MS_PER_NS;
 			results.set(choosenColor, results.get(choosenColor) + (100000 / timeInMilliseconds ));
-		})
-	
-	//Check if the array still have colors inside it
-			//If it still have some : Wait 2 seconds (random colors appearing on the led during these 2 seconds ?), then change the color with a random one from the array
-			//If it does not have color, end the game
-	} while (randomColors.length > 0);
-	
-	//change state of the match
-	await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING}, { state: Match.STATE_FINISHED });
 
-	//TODO : attribute each color points to the user who have it
-	console.log(results)
-	//-----------------GAME END HERE----------------------
+			//END
+			if(randomColors.length == 0) {
+				client.unsubscribe(buttonSubscription);
+				client.publish(ledPublish, configThingy.colors.favorite);
+				//TODO : attribute each color points to the user who have it
+				console.log(results);
+				//change state of the match
+				await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING}, { state: Match.STATE_FINISHED });
+				//-----------------GAME ENDS HERE----------------------
+			} else {
+				client.publish(ledPublish, configThingy.colors.none);
+				await Utilities.sleep(2000);
+				//when the color is randomly selected, remove it from the array
+				choosenColor = randomColors.pop();
+				client.publish(ledPublish, choosenColor);
+				_time = process.hrtime();
+				_waiting = true;
+			}
+		}
+	});
+
+	//when the color is randomly selected, remove it from the array
+	let choosenColor = randomColors.pop();
+	client.publish(ledPublish, choosenColor);
+	_waiting = true;
+	var _time = process.hrtime();
 }
-
 
 module.exports = {
     start

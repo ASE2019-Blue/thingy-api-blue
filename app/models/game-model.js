@@ -2,7 +2,8 @@
 
 const TAP_GAME = 'tap-game';
 const HIDE_AND_SEEK = 'hide-and-seek';
-const GAME_KEYS = [TAP_GAME, HIDE_AND_SEEK];
+const DEMO = 'demo';
+const GAME_KEYS = [TAP_GAME, HIDE_AND_SEEK, DEMO];
 
 const GAMES = [
     {
@@ -17,8 +18,14 @@ const GAMES = [
         description: 'This is the ultimate team hide and seek. The players are grouped into two teams, a \"Hiders\" and a \"Seakers\". As the name states, the goal for the \"Hiders\" is to find the \"Seakers\" and the \"Seakers\" try to avoid this.\n\n\The \"Hiders\" receive an advance of 5min to hide. Once this is done, the \"Seakers\" receive the location of the \"Hiders\". This location is updated in an increasing frequency (from once all 5min to all 30s). Once the \"Seakers\" found the \"Hiders\" and managed to double-tap on their THINGY, they win. On the other hand, if the game limit of 30min is exceeded, the \"Hiders\" win.',
         icon: 'game'
     },
+    {
+        key: DEMO,
+        title: 'Demo',
+        description: 'This is a demo for for the first version of the Thingy project.',
+        icon: 'game'
+    },
 ];
 
 module.exports = {
-    TAP_GAME, HIDE_AND_SEEK, GAME_KEYS, GAMES
+    TAP_GAME, HIDE_AND_SEEK, DEMO, GAME_KEYS, GAMES
 };
