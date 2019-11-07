@@ -8,7 +8,6 @@ const Mqtt = require('../mqtt');
 Mqtt.client.subscribe('+/Connected');
 Mqtt.client.on('message', async function (topic, message) {
     if(topic.endsWith('/Connected')) {
-        console.log('Thingy: '+message.toString()+';'+topic.toString());
         var thingyMAC = topic.replace('/Connected', '');
         var thingy = await Thingy.findOne({macAddress: thingyMAC});
         if (message == 'true') {
