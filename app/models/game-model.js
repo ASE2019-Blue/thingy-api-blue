@@ -20,8 +20,8 @@ const GAMES = [
     },
     {
         key: DEMO,
-        title: 'Demo 1',
-        description: 'This is a demo for Sprint 1',
+        title: 'Demo',
+        description: 'This is a demo for for the first version of the Thingy project.',
         icon: 'game'
     },
 ];
