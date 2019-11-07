@@ -1,0 +1,17 @@
+XX:XX:XX:XX:XX:XX represents the MAC of the thingy. We have:
+- e3:af:9b:f4:a1:c7 (Christian)
+- d9:60:eb:5f:df:e3 (Loic 1)
+- ce:3b:a3:af:50:2b (Loic 2)
+
+-- sub to all --
+mosquitto_sub -t '#' -v -h mqtt.thing.zone -p 1894 -u blue -P <password>
+
+-- sub to one thingy, all data --
+mosquitto_sub -t 'XX:XX:XX:XX:XX:XX/#' -v -h mqtt.thing.zone -p 1894 -u blue -P <password>
+
+-- change color --
+!!! only works once per gateway runcycle - restart gateway for second time !!!
+mosquitto_pub -t 'XX:XX:XX:XX:XX:XX/Thingy User Interface Service/Thingy LED Characteristic/Set' -m '1,255,0,0' -h mqtt.thing.zone -p 1894 -u blue -P <password>
+
+-- get button status --
+mosquitto_sub -t 'XX:XX:XX:XX:XX:XX/Thingy User Interface Service/Thingy Button Characteristic' -h mqtt.thing.zone -p 1894 -u blue -P <password>

@@ -1,0 +1,50 @@
+{
+  "name": "thingy-api-blue",
+  "version": "1.0.0",
+  "description": "Thingy API of team blue",
+  "main": "app/index.js",
+  "scripts": {
+    "server": "nodemon app/index.js",
+    "start": "echo 'This script is deprecated. Use `npm run server` instead.'"
+  },
+  "keywords": [
+    "rest",
+    "api",
+    "todos"
+  ],
+  "contributors": [
+    {
+      "name": "Christian Fries",
+      "email": "christian.fries@unifr.ch"
+    },
+    {
+      "name": "Christian Zürcher",
+      "email": "christian.zuercher@students.unibe.ch"
+    },
+    {
+      "name": "Daniel Pfund",
+      "email": "dany.pfd@gmail.com"
+    },
+    {
+      "name": "Loïc Rosset",
+      "email": "loicrosset1@gmail.com"
+    }
+  ],
+  "license": "ISC",
+  "dependencies": {
+    "@koa/cors": "^2.2.2",
+    "bcrypt": "^3.0.6",
+    "dotenv": "^8.2.0",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.5.2",
+    "koa-bodyparser": "^4.2.1",
+    "koa-helmet": "^5.1.0",
+    "koa-jwt": "^3.6.0",
+    "koa-router": "^7.4.0",
+    "mongoose": "^5.7.7",
+    "mqtt": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.4"
+  }
+}
