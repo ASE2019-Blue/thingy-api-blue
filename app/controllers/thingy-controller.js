@@ -7,20 +7,27 @@ const Mqtt = require('../mqtt');
  */
 Mqtt.client.subscribe('+/Connected');
 Mqtt.client.on('message', async function (topic, message) {
-    var thingyMAC = topic.replace('/Connected', '');
-    if (message == 'true') {
-        const thingy = new Thingy();
-        try {
-            thingy.macAddress = thingyMAC;
-            await thingy.save();
-        } catch (err) {
-            console.error(err);
-        }
-    } else {
-        try {
-            await Thingy.findOneAndDelete({macAddress: thingyMAC});
-        }catch (err) {
-            console.error(err);
+    if(topic.endsWith('/Connected')) {
+        console.log('Thingy: '+message.toString()+';'+topic.toString());
+        var thingyMAC = topic.replace('/Connected', '');
+        var thingy = await Thingy.findOne({macAddress: thingyMAC});
+        if (message == 'true') {
+            if(thingy == null) {
+                thingy = new Thingy();
+                thingy.macAddress = thingyMAC;
+            }
+            try {
+                await thingy.save();
+            } catch (err) {
+                console.error(err);
+            }
+        } else {
+            try {
+                if(thingy!=null)
+                    await thingy.remove();
+            }catch (err) {
+                console.error(err);
+            }
         }
     }
 });
