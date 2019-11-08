@@ -7,8 +7,12 @@ const ThingySchema = new mongoose.Schema({
         },
         lockedForUser: {
             type: String,
-            ref: 'User',
+            ref: 'User'
         },
+        available: {
+            type: Boolean,
+            required: true
+        }
     }, {
         timestamps: true
 });

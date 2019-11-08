@@ -330,6 +330,7 @@ components:
         - _id
         - macAddress
         - lockedForUser
+        - available
       properties:
         _id:
           type: string
@@ -338,6 +339,8 @@ components:
         lockedForUser:
           type: string
           nullable: true
+        available:
+          type: boolean
     UserCredentials:
       type: object
       required:

@@ -8,22 +8,30 @@ const Mqtt = require('../mqtt');
 Mqtt.client.subscribe('+/Connected');
 Mqtt.client.on('message', async function (topic, message) {
     if(topic.endsWith('/Connected')) {
+        // get MAC of thingy that threw the message
         var thingyMAC = topic.replace('/Connected', '');
+        // get Thingy if available
         var thingy = await Thingy.findOne({macAddress: thingyMAC});
+        // if no exists, add to DB
+        if(thingy == null) {
+            thingy = new Thingy();
+            thingy.macAddress = thingyMAC;
+        }
+        // process a connected Thingy
         if (message == 'true') {
-            if(thingy == null) {
-                thingy = new Thingy();
-                thingy.macAddress = thingyMAC;
-            }
+            // Thingy is now available
+            thingy.available = true;
             try {
                 await thingy.save();
             } catch (err) {
                 console.error(err);
             }
+        // process a disconnected Thingy
         } else {
             try {
-                if(thingy!=null)
-                    await thingy.remove();
+                // Thingy is no more available
+                thingy.available = false;
+                await thingy.save();
             }catch (err) {
                 console.error(err);
             }
@@ -46,6 +54,17 @@ async function findAll(ctx, next) {
     // await thingy.save();
 
     ctx.body = await Thingy.find({});
+}
+
+/**
+ * Find all available thingys.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findAllAvailable(ctx, next) {
+    ctx.body = await Thingy.find({available: true});
 }
 
 /**
@@ -90,6 +109,7 @@ async function unlock(ctx, next) {
 
 module.exports = {
     findAll,
+    findAllAvailable,
     lock,
     unlock,
 };
