@@ -42,10 +42,6 @@ paths:
       responses:
         200:
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: string
         400:
           description: Invalid input
           
@@ -63,10 +59,6 @@ paths:
       responses:
         200:
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: string
         400:
           description: Invalid input
 
@@ -107,6 +99,69 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
+                
+  /matches:
+    get:
+      summary: Get list of matches
+      tags: ['Matches']
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+  
+  /matches/{matchId}:
+    get:
+      summary: Get specific match
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/Match'
+        404:
+          description: Match not found
+                  
+  /matches/{matchId}/{state}:
+    put:
+      summary: Change match state
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [running, finished]
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Invalid state
+        404:
+          description: Match not found
+        500:
+          description: Unexpected error
+  
   /sign-up:
     post:
       summary: Sign up a new user

@@ -37,4 +37,8 @@ const MatchSchema = new mongoose.Schema({
         timestamps: true
 });
 
-module.exports = mongoose.model('Match', MatchSchema);
+const MODEL = mongoose.model('Match', MatchSchema);
+
+module.exports = {
+    MODEL, MATCH_STATES, STATE_CREATED, STATE_RUNNING, STATE_FINISHED
+};

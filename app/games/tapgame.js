@@ -1,4 +1,4 @@
-const mqtt = require('mqtt');
+const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 //const client = require('../mqtt');
@@ -38,14 +38,10 @@ async function start(match){
 		//map of players with their color so we can attribute points not to color but to player at the end
 		//number of turn
 
-	const client  = mqtt.connect({
-    	host: process.env.MQTT_BROKER_HOST,
-    	port: process.env.MQTT_BROKER_PORT,
-    	username: process.env.MQTT_BROKER_USER,
-    	password: process.env.MQTT_BROKER_PASSWORD
-	});
+	const client = mqtt.client;
 
 	//For development purpose only: hardcoded MAC
+	// let thingyURI = match.config.thingys[0].macAddress;
 	let thingyURI = 'e3:af:9b:f4:a1:c7';
 	const buttonSubscription = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.button;
 	const ledPublish = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.led + '/Set';
@@ -73,6 +69,8 @@ async function start(match){
 	}
 	//shuffle the array
 	shuffle(randomColors);
+
+	await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED}, { state: Match.STATE_RUNNING });
 	//-----------------END OF CONFIG------------------------
 
 
@@ -86,7 +84,7 @@ async function start(match){
 	//We then wait someone to push the button on the thingy
 	client.on('message', async function (topic, message) {
 
-		if(topic==buttonSubscription && _waiting){
+		if(topic==buttonSubscription && message == 'true' && _waiting){
 			_waiting = false;
 			//we create points related with the timer and add it to the user who push the button
 			//calcul for points : 100000 divided by time taken to push the button in milliseconds
@@ -97,11 +95,11 @@ async function start(match){
 			//END
 			if(randomColors.length == 0) {
 				client.unsubscribe(buttonSubscription);
-				client.publish(ledPublish, configThingy.colors.favorite);
 				//TODO : attribute each color points to the user who have it
 				console.log(results);
 				//change state of the match
 				await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING}, { state: Match.STATE_FINISHED });
+				client.publish(ledPublish, configThingy.colors.favorite);
 				//-----------------GAME ENDS HERE----------------------
 			} else {
 				client.publish(ledPublish, configThingy.colors.none);
@@ -122,6 +120,17 @@ async function start(match){
 	var _time = process.hrtime();
 }
 
+async function stop(match) {
+	// let thingyURI = match.config.thingys[0].macAddress;
+	let thingyURI = 'e3:af:9b:f4:a1:c7';
+	const buttonSubscription = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.button;
+	const ledPublish = thingyURI + '/' + configThingy.config.services.userInterface + '/' + configThingy.config.characteristics.led + '/Set';
+	const client = mqtt.client;
+	client.unsubscribe(buttonSubscription);
+	await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING}, { state: Match.STATE_FINISHED });
+	client.publish(ledPublish, configThingy.colors.favorite);
+}
+
 module.exports = {
-    start
+    start, stop
 };
