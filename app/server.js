@@ -6,6 +6,7 @@ const BodyParser = require('koa-bodyparser');
 const Helmet = require('koa-helmet');
 const Database = require('./db');
 const Mqtt = require('./mqtt');
+const ThingyService = require('./services/thingy-service')
 
 const app = new Koa();
 const router = new Router();
@@ -29,5 +30,7 @@ app.use(Jwt({ secret: process.env.SECRET }).unless({ path: [
 require('./routes')(router);
 app.use(router.routes());
 app.use(router.allowedMethods());
+
+ThingyService.recordThingyConnectionStatus();
 
 module.exports = app;
