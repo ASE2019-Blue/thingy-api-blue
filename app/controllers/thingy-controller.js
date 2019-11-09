@@ -13,8 +13,22 @@ async function findAll(ctx, next) {
     // thingy.macAddress = '11-22-33-44-55-66';
     // thingy.lockedForUser = null;
     // await thingy.save();
+    let available = ctx.request.query['available'];
+    if(available !== undefined && available === '1')
+        ctx.body = await Thingy.find({available: true});
+    else
+        ctx.body = await Thingy.find({});
+}
 
-    ctx.body = await Thingy.find({});
+/**
+ * Find all available thingys.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findAllAvailable(ctx, next) {
+    ctx.body = await Thingy.find({available: true});
 }
 
 /**

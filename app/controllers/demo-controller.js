@@ -8,17 +8,24 @@ const Utilities = require('../services/utility-service');
  * @param next
  * @returns {Promise<void>}
  */
+var _isSubscribed = false;
 async function demo(ctx, next) {
-    Mqtt.client.subscribe('e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy Button Characteristic');
-    Mqtt.client.on('message', async function (topic, message) {
-        // console.log(message.toString());
-        if(message=='true'){
-            noColour();
-            await Utilities.sleep(1500);
-            changeColor();
-        }
-    });
-    changeColor();
+    if(!_isSubscribed) {
+        var subscription = 'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy Button Characteristic';
+        Mqtt.client.subscribe(subscription);
+        _isSubscribed = true;
+        Mqtt.client.on('message', async function (topic, message) {
+            if(topic==subscription){
+                console.log('Demo: '+message.toString()+';'+topic.toString());
+                if(message=='true'){
+                    noColour();
+                    await Utilities.sleep(1500);
+                    changeColor();
+                }
+            }
+        });
+        changeColor();
+    }
 }
 
 /**

@@ -132,6 +132,12 @@ paths:
     get:
       summary: Get a list of thingys
       tags: ['Thingys']
+      parameters:
+        - in: query
+          name: available
+          schema:
+            type: integer
+          description: 1 if only the available thingys should be returned
       responses:
         200:
           description: Success
@@ -330,6 +336,7 @@ components:
         - _id
         - macAddress
         - lockedForUser
+        - available
       properties:
         _id:
           type: string
@@ -338,6 +345,8 @@ components:
         lockedForUser:
           type: string
           nullable: true
+        available:
+          type: boolean
     UserCredentials:
       type: object
       required:
