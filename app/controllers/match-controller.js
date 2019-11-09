@@ -16,7 +16,7 @@ async function findAll(ctx, next) {
     // Add some latency for better async testing
     // TODO Remove after development
     await Utilities.sleep(800);
-    const matches = await Match.find({}).select(MATCH_FIELDS_WITHOUT_THINGY);
+    const matches = await Match.MODEL.find({}).select(MATCH_FIELDS_WITHOUT_THINGY);
     ctx.body = matches;
 }
 
