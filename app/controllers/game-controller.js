@@ -23,24 +23,24 @@ async function findAll(ctx, next) {
  * @returns {Promise<void>}
  */
 async function addMatch(ctx, next) {
-    const gameKey = ctx.params['gameKey'];
+    const { gameKey } = ctx.params;
 
     if (!Game.GAME_KEYS.includes(gameKey)) {
-        ctx.throw(404, {'error': 'Game not found'});
+        ctx.throw(404, { error: 'Game not found' });
     }
 
     // TODO Validate input (thingys, config, only one match per user at the same time)
     const matchDto = ctx.request.body;
 
-    if (typeof matchDto.config == "undefined") {
-        ctx.throw(400, {'error': 'You need to provide a config for the match'});
+    if (typeof matchDto.config === 'undefined') {
+        ctx.throw(400, { error: 'You need to provide a config for the match' });
     }
 
-    if (typeof matchDto.thingys == "undefined") {
-        ctx.throw(400, {'error': 'You need to provide a list of thingys to use for the match'});
+    if (typeof matchDto.thingys === 'undefined') {
+        ctx.throw(400, { error: 'You need to provide a list of thingys to use for the match' });
     }
 
-    const username = ctx.state.user.username;
+    const { username } = ctx.state.user;
     const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
@@ -54,5 +54,5 @@ async function addMatch(ctx, next) {
 
 module.exports = {
     findAll,
-    addMatch
+    addMatch,
 };

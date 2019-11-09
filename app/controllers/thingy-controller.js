@@ -13,11 +13,9 @@ async function findAll(ctx, next) {
     // thingy.macAddress = '11-22-33-44-55-66';
     // thingy.lockedForUser = null;
     // await thingy.save();
-    let available = ctx.request.query['available'];
-    if(available !== undefined && available === '1')
-        ctx.body = await Thingy.find({available: true});
-    else
-        ctx.body = await Thingy.find({});
+    const { available } = ctx.request.query;
+    if (available !== undefined && available === '1') ctx.body = await Thingy.find({ available: true });
+    else ctx.body = await Thingy.find({});
 }
 
 /**
@@ -29,12 +27,12 @@ async function findAll(ctx, next) {
  */
 async function lock(ctx, next) {
     // TODO Validate user input
-    const thingyId = ctx.params.thingyId;
-    const username = ctx.state.user.username;
+    const { thingyId } = ctx.params;
+    const { username } = ctx.state.user;
 
-    let thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
+    const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
 
-    if (null === thingy) {
+    if (thingy === null) {
         ctx.throw(400, 'Invalid request');
     }
     ctx.status = 200;
@@ -49,12 +47,12 @@ async function lock(ctx, next) {
  */
 async function unlock(ctx, next) {
     // TODO Validate user input
-    const thingyId = ctx.params.thingyId;
-    const username = ctx.state.user.username;
+    const { thingyId } = ctx.params;
+    const { username } = ctx.state.user;
 
-    let thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
+    const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
 
-    if (null === thingy) {
+    if (thingy === null) {
         ctx.throw(400, 'Invalid request');
     }
     ctx.status = 200;

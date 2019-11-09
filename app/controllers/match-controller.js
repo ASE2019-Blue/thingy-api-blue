@@ -30,10 +30,10 @@ async function findAll(ctx, next) {
 async function find(ctx, next) {
     // Add some latency for better async testing
     // TODO Remove after development
-    const matchId = ctx.params['matchId'];
+    const { matchId } = ctx.params;
     await Utilities.sleep(800);
-    const match = await Match.MODEL.findOne({_id: matchId});
-    if(null === match) ctx.throw(404, {'error': 'Match not found'});
+    const match = await Match.MODEL.findOne({ _id: matchId });
+    if (match === null) ctx.throw(404, { error: 'Match not found' });
     ctx.body = match;
 }
 
@@ -45,34 +45,35 @@ async function find(ctx, next) {
  * @returns {Promise<void>}
  */
 async function changeStatus(ctx, next) {
-    const matchId = ctx.params['matchId'];
-    const state = ctx.request.body['state'];
+    const { matchId } = ctx.params;
+    const { state } = ctx.request.body;
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
     if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
 
-    const match = Match.MODEL.findOne({_id: matchId});
-    if(null === match) ctx.throw(404, {'error': 'Match not found'});
-    const gameKey = match.gameKey;
-    try{
-        switch(state){
-            case Match.STATE_RUNNING:
-                //For each game add a test on gameKey and launch the corresponding one
-                //Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
-                if(gameKey === Game.TAP_GAME){
-                    Tapgame.start(match)
-                } else if (gameKey === Game.HIDE_AND_SEEK){
-                    //Hideandseek.start(match)
-                }
-                break;
-            case Match.STATE_FINISHED:
-                //For each game add a test on gameKey and launch the corresponding one
-                //Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
-                if(gameKey === Game.TAP_GAME){
-                    Tapgame.stop(match)
-                } else if (gameKey === Game.HIDE_AND_SEEK){
-                    //Hideandseek.stop(match)
-                }
-                break;
+    const match = Match.MODEL.findOne({ _id: matchId });
+    if (match === null) ctx.throw(404, { error: 'Match not found' });
+    const { gameKey } = match;
+    try {
+        switch (state) {
+        case Match.STATE_RUNNING:
+            // For each game add a test on gameKey and launch the corresponding one
+            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
+            if (gameKey === Game.TAP_GAME) {
+                Tapgame.start(match);
+            } else if (gameKey === Game.HIDE_AND_SEEK) {
+                // Hideandseek.start(match)
+            }
+            break;
+        case Match.STATE_FINISHED:
+            // For each game add a test on gameKey and launch the corresponding one
+            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
+            if (gameKey === Game.TAP_GAME) {
+                Tapgame.stop(match);
+            } else if (gameKey === Game.HIDE_AND_SEEK) {
+                // Hideandseek.stop(match)
+            }
+            break;
+        default:
         }
     } catch (err) {
         ctx.throw(500, err);
@@ -83,5 +84,5 @@ async function changeStatus(ctx, next) {
 module.exports = {
     findAll,
     find,
-    changeStatus
+    changeStatus,
 };

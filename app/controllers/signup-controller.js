@@ -14,12 +14,12 @@ async function signUp(ctx, next) {
     const user = new User();
 
     try {
-        // TODO Validate user input
+    // TODO Validate user input
         const hash = await bcrypt.hash(userDto.password, 12);
         user._id = userDto.username;
         user.username = userDto.username;
-        user.firstName = userDto.firstName != null ? userDto.firstName : "";
-        user.lastName = userDto.lastName != null ? userDto.firstName : "";
+        user.firstName = userDto.firstName != null ? userDto.firstName : '';
+        user.lastName = userDto.lastName != null ? userDto.firstName : '';
         user.hash = hash;
 
         await user.save();
@@ -31,9 +31,9 @@ async function signUp(ctx, next) {
     }
 
     const token = jwt.sign({ username: user.username }, process.env.SECRET);
-    ctx.body = { token: token }
+    ctx.body = { token };
 }
 
 module.exports = {
-    signUp
+    signUp,
 };

@@ -27,10 +27,10 @@ async function findAll(ctx, next) {
  * @returns {Promise<void>}
  */
 async function findOne(ctx, next) {
-    const username = ctx.params.username;
+    const { username } = ctx.params;
 
     // TODO Validate user input
-    const user = await User.findOne({username: username}).select(USER_FIELDS_PROFILE_FULL);
+    const user = await User.findOne({ username }).select(USER_FIELDS_PROFILE_FULL);
     if (!user) {
         ctx.throw(404, 'User not found');
     }
@@ -50,7 +50,7 @@ async function findOne(ctx, next) {
  * @returns {Promise<void>}
  */
 async function changePassword(ctx, next) {
-    const username = ctx.params.username;
+    const { username } = ctx.params;
     const usernameOfLoggedInUser = ctx.state.user.username;
     const newPasswordDto = ctx.request.body;
 
@@ -58,12 +58,12 @@ async function changePassword(ctx, next) {
         ctx.throw(400, 'You can not change the password of someone else');
     }
 
-    const user = await User.findOne({username: username});
+    const user = await User.findOne({ username });
     if (!user) {
         ctx.throw(404, 'User not found');
     }
 
-    if (typeof newPasswordDto.currentPassword === "undefined" || typeof newPasswordDto.newPassword === "undefined") {
+    if (typeof newPasswordDto.currentPassword === 'undefined' || typeof newPasswordDto.newPassword === 'undefined') {
         ctx.throw(400, 'You need to provide the current and the new password');
     }
 
@@ -81,5 +81,5 @@ async function changePassword(ctx, next) {
 module.exports = {
     findAll,
     findOne,
-    changePassword
+    changePassword,
 };

@@ -1,4 +1,5 @@
 const Mqtt = require('../mqtt');
+const Thingy = require('../models/thingy-model');
 
 /**
  * Listens to the connection status of the Thingies. When true, the Thingy just connected,
@@ -6,19 +7,19 @@ const Mqtt = require('../mqtt');
  */
 function recordThingyConnectionStatus() {
     Mqtt.client.subscribe('+/Connected');
-    Mqtt.client.on('message', async function (topic, message) {
+    Mqtt.client.on('message', async (topic, message) => {
         if (topic.endsWith('/Connected')) {
             // get MAC of thingy that threw the message
-            var thingyMAC = topic.replace('/Connected', '');
+            const thingyMAC = topic.replace('/Connected', '');
             // get Thingy if available
-            var thingy = await Thingy.findOne({ macAddress: thingyMAC });
+            let thingy = await Thingy.findOne({ macAddress: thingyMAC });
             // if no exists, add to DB
             if (thingy == null) {
                 thingy = new Thingy();
                 thingy.macAddress = thingyMAC;
             }
             // process a connected Thingy
-            if (message == 'true') {
+            if (message === 'true') {
                 // Thingy is now available
                 thingy.available = true;
                 try {
@@ -41,5 +42,5 @@ function recordThingyConnectionStatus() {
 }
 
 module.exports = {
-    recordThingyConnectionStatus
+    recordThingyConnectionStatus,
 };

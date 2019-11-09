@@ -9,3 +9,7 @@
 ## Documentation
 
 The documentation for this API is written as an OpenAPI Specification. Copy the content of the file `open-api-specification.yaml` to your clipboard, open the [swagger editor](http://editor.swagger.io/) and paste the content into the editor.
+
+## Apply coding standards
+
+To apply the coding standards to the codebase automatically, run `npm run lint`. If errors occur, fix them manually.

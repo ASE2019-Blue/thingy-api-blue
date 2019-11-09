@@ -13,7 +13,7 @@ async function createToken(ctx, next) {
     const userCredentialsDto = ctx.request.body;
 
     // TODO Validate user input
-    const user = await User.findOne({username: userCredentialsDto.username});
+    const user = await User.findOne({ username: userCredentialsDto.username });
     if (!user) {
         ctx.throw(400, 'Invalid request');
     }
@@ -25,9 +25,9 @@ async function createToken(ctx, next) {
 
     const token = jwt.sign({ username: user.username }, process.env.SECRET);
 
-    ctx.body = { token: token }
+    ctx.body = { token };
 }
 
 module.exports = {
-    createToken
+    createToken,
 };

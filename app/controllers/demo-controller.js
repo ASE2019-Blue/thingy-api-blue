@@ -8,16 +8,16 @@ const Utilities = require('../services/utility-service');
  * @param next
  * @returns {Promise<void>}
  */
-var _isSubscribed = false;
+let _isSubscribed = false;
 async function demo(ctx, next) {
-    if(!_isSubscribed) {
-        var subscription = 'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy Button Characteristic';
+    if (!_isSubscribed) {
+        const subscription = 'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy Button Characteristic';
         Mqtt.client.subscribe(subscription);
         _isSubscribed = true;
-        Mqtt.client.on('message', async function (topic, message) {
-            if(topic==subscription){
-                console.log('Demo: '+message.toString()+';'+topic.toString());
-                if(message=='true'){
+        Mqtt.client.on('message', async (topic, message) => {
+            if (topic === subscription) {
+                console.log(`Demo: ${message.toString()};${topic.toString()}`);
+                if (message === 'true') {
                     noColour();
                     await Utilities.sleep(1500);
                     changeColor();
@@ -26,7 +26,7 @@ async function demo(ctx, next) {
         });
         changeColor();
     }
-    ctx.body = "OK";
+    ctx.body = 'OK';
 }
 
 /**
@@ -41,13 +41,14 @@ async function changeColor() {
         '1,255,0,0',
         '1,0,255,0',
         '1,0,0,255',
-        '1,255,125,0'
+        '1,255,125,0',
     ];
-    var colorIndex = Math.floor(Math.random()*colors.length);
-    var color = colors[colorIndex];
+    const colorIndex = Math.floor(Math.random() * colors.length);
+    const color = colors[colorIndex];
     Mqtt.client.publish(
         'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy LED Characteristic/Set',
-        color);
+        color,
+    );
 }
 
 /**
@@ -56,7 +57,8 @@ async function changeColor() {
 async function noColour() {
     Mqtt.client.publish(
         'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy LED Characteristic/Set',
-        '1,0,0,0');
+        '1,0,0,0',
+    );
 }
 
 /**
@@ -70,11 +72,12 @@ async function stop(ctx, next) {
     Mqtt.client.unsubscribe('e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy Button Characteristic');
     Mqtt.client.publish(
         'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy LED Characteristic/Set',
-        '1,3,1,0');
-    ctx.body = "OK";
+        '1,3,1,0',
+    );
+    ctx.body = 'OK';
 }
 
 module.exports = {
     demo,
-    stop
+    stop,
 };
