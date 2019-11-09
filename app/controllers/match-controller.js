@@ -46,7 +46,7 @@ async function find(ctx, next) {
  */
 async function changeStatus(ctx, next) {
     const matchId = ctx.params['matchId'];
-    const state = ctx.params['state'];
+    const state = ctx.request.body['state'];
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
     if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
 

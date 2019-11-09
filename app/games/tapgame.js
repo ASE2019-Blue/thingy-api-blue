@@ -75,6 +75,7 @@ async function start(match){
 
 
 	//-----------------GAME START HERE----------------------
+	client.publish(ledPublish, configThingy.colors.none);
 	//Wait 5 seconds to let people get ready
 	await Utilities.sleep(5000);
 
@@ -128,6 +129,8 @@ async function stop(match) {
 	const client = mqtt.client;
 	client.unsubscribe(buttonSubscription);
 	await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING}, { state: Match.STATE_FINISHED });
+	// To be sure to publish after last change of change colour
+	await Utilities.sleep(2000);
 	client.publish(ledPublish, configThingy.colors.favorite);
 }
 

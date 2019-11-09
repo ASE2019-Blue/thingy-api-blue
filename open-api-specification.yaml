@@ -136,7 +136,7 @@ paths:
         404:
           description: Match not found
                   
-  /matches/{matchId}/{state}:
+  /matches/{matchId}/state:
     put:
       summary: Change match state
       tags: ['Matches']
@@ -146,12 +146,15 @@ paths:
           required: true
           schema:
             type: string
-        - name: state
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [running, finished]
+      requestBody:
+        description: state
+        content:
+          application/json:
+            schema:
+              properties:
+                state:
+                  type: string
+                  enum: [running, finished]
       responses:
         200:
           description: Successful opeation
