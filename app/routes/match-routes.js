@@ -4,6 +4,7 @@ const router = new Router();
 const Ctrl = require('../controllers/match-controller');
 
 router.get('/', Ctrl.findAll)
-    .patch('/:matchId/start', Ctrl.startMatch);
+    .get('/:matchId', Ctrl.find)
+    .put('/:matchId/state', Ctrl.changeStatus);
 
 module.exports = router.routes();
