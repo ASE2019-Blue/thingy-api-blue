@@ -41,7 +41,7 @@ async function addMatch(ctx, next) {
     }
 
     const username = ctx.state.user.username;
-    const match = new Match();
+    const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
     match.config = matchDto.config;
