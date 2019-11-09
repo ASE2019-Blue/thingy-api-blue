@@ -32,7 +32,7 @@ async function find(ctx, next) {
     // TODO Remove after development
     const matchId = ctx.params['matchId'];
     await Utilities.sleep(800);
-    const match = Match.MODEL.findOne({_id: matchId});
+    const match = await Match.MODEL.findOne({_id: matchId});
     if(null === match) ctx.throw(404, {'error': 'Match not found'});
     ctx.body = match;
 }

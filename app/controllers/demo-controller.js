@@ -26,6 +26,7 @@ async function demo(ctx, next) {
         });
         changeColor();
     }
+    ctx.body = "OK";
 }
 
 /**
@@ -70,6 +71,7 @@ async function stop(ctx, next) {
     Mqtt.client.publish(
         'e3:af:9b:f4:a1:c7/Thingy User Interface Service/Thingy LED Characteristic/Set',
         '1,3,1,0');
+    ctx.body = "OK";
 }
 
 module.exports = {

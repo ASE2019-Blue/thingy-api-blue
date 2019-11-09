@@ -21,17 +21,6 @@ async function findAll(ctx, next) {
 }
 
 /**
- * Find all available thingys.
- *
- * @param ctx
- * @param next
- * @returns {Promise<void>}
- */
-async function findAllAvailable(ctx, next) {
-    ctx.body = await Thingy.find({available: true});
-}
-
-/**
  * Lock thingy to current user.
  *
  * @param ctx
