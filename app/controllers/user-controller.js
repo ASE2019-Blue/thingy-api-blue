@@ -43,6 +43,41 @@ async function findOne(ctx, next) {
 }
 
 /**
+ * Change the information of the currently logged in user.
+ * Username cannot be changed for now.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function change(ctx, next) {
+    const { username } = ctx.params;
+    const usernameOfLoggedInUser = ctx.state.user.username;
+    const newUserDto = ctx.request.body;
+
+    if (username !== usernameOfLoggedInUser) {
+        ctx.throw(400, 'You can not change the information of someone else');
+    }
+
+    const user = await User.findOne({ username });
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    try {
+        // TODO Validate user input
+        user.firstName = newUserDto.firstName != null ? newUserDto.firstName : '';
+        user.lastName = newUserDto.lastName != null ? newUserDto.lastName : '';
+
+        await user.save();
+    } catch (err) {
+        ctx.throw(400, err);
+    }
+
+    ctx.status = 200;
+}
+
+/**
  * Change the password of the currently logged in user.
  *
  * @param ctx
@@ -81,5 +116,6 @@ async function changePassword(ctx, next) {
 module.exports = {
     findAll,
     findOne,
+    change,
     changePassword,
 };
