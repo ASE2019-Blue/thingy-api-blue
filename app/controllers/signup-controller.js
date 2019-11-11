@@ -19,7 +19,7 @@ async function signUp(ctx, next) {
         user._id = userDto.username;
         user.username = userDto.username;
         user.firstName = userDto.firstName != null ? userDto.firstName : '';
-        user.lastName = userDto.lastName != null ? userDto.firstName : '';
+        user.lastName = userDto.lastName != null ? userDto.lastName : '';
         user.hash = hash;
 
         await user.save();
