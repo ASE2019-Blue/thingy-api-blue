@@ -50,7 +50,7 @@ async function changeStatus(ctx, next) {
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
     if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
 
-    const match = Match.MODEL.findOne({ _id: matchId });
+    const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
     if (match === null) ctx.throw(404, { error: 'Match not found' });
     const { gameKey } = match;
     try {

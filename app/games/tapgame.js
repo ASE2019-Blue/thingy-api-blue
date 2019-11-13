@@ -39,25 +39,26 @@ async function start(match) {
     const { client } = mqtt;
 
     // For development purpose only: hardcoded MAC
-    // let thingyURI = match.config.thingys[0].macAddress;
-    const thingyURI = 'e3:af:9b:f4:a1:c7';
+    let thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
 
+    
+    // array of players
+    let players = match.config.players;
     // array of selected colors by the client
-    // const colors = match.config.colors;
-    const colors = [configThingy.colors.red, configThingy.colors.blue, configThingy.colors.green];
+    const colors = new Array(players.length);
+    for(let i = players.length - 1; i >= 0; i--){
+        colors[i] = '1,'+players[i].color;
+    }
+
     const results = new Map();
     for (let i = colors.length - 1; i >= 0; i--) {
         results.set(colors[i], 0);
     }
 
-    // array of players
-    // let players = match.config.players;
-
     // number of turns
-    // let nbTurns = match.config.turns;
-    const nbTurns = 3;
+    let nbTurns = match.config.numberOfRounds;
 
     // create a fair array of color with the ones given in the config
     // multiply each color by the number of turn
@@ -68,7 +69,7 @@ async function start(match) {
     // shuffle the array
     shuffle(randomColors);
 
-    await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
+    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
     // -----------------END OF CONFIG------------------------
 
 
@@ -82,7 +83,7 @@ async function start(match) {
 
     // We then wait someone to push the button on the thingy
     client.on('message', async (topic, message) => {
-        if (topic === buttonSubscription && message === 'true' && _waiting) {
+        if (topic === buttonSubscription && message.toString() === 'true' && _waiting) {
             _waiting = false;
             // we create points related with the timer and add it to the user who push the button
             // calcul for points : 100000 divided by time taken to push the button in milliseconds
@@ -96,7 +97,7 @@ async function start(match) {
                 // TODO : attribute each color points to the user who have it
                 console.log(results);
                 // change state of the match
-                await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
+                await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
                 client.publish(ledPublish, configThingy.colors.favorite);
                 // -----------------GAME ENDS HERE----------------------
             } else {
@@ -125,7 +126,7 @@ async function stop(match) {
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
+    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, configThingy.colors.favorite);
