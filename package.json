@@ -7,7 +7,7 @@
     "lint": "eslint --fix app/ || true",
     "server": "nodemon app/index.js",
     "start": "echo 'This script is deprecated. Use `npm run server` instead.'",
-    "test": "mocha --recursive"
+    "test": "nyc --reporter=lcov --all mocha --recursive"
   },
   "keywords": [
     "rest",
@@ -53,6 +53,7 @@
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "mocha": "^6.2.2",
-    "nodemon": "^1.19.4"
+    "nodemon": "^1.19.4",
+    "nyc": "^14.1.1"
   }
 }
