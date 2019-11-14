@@ -6,22 +6,21 @@ const port = process.env.PORT || 3000;
 server.listen(port, () => console.log(`API server started on ${port}`));
 
 
-
-//websocket config
-console.log('websocket connected')
-io.on('connection', function(socket){
+// websocket config
+console.log('websocket connected');
+io.on('connection', (socket) => {
     console.log('Socket connection', socket.id);
 
-    socket.on('start', function(data){
+    socket.on('start', (data) => {
         socket.join(data.matchId);
     });
 
-    socket.on('stop', function(data){
+    socket.on('stop', (data) => {
         socket.leave(data.matchId);
     });
 
-    socket.on('disconnect', function(){
-        for (var i = socket.rooms.length - 1; i >= 0; i--) {
+    socket.on('disconnect', () => {
+        for (let i = socket.rooms.length - 1; i >= 0; i--) {
             socket.leave(socket.rooms[i]);
         }
     });

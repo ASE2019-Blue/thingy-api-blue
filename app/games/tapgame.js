@@ -2,7 +2,6 @@ const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
-const IO = require('../index');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -44,28 +43,28 @@ async function start(match) {
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
 
-    
+
     // array of players
-    let players = match.players;
+    const { players } = match;
     // array of selected colors by the client
     const colors = new Array(players.length);
-    for(let i = players.length - 1; i >= 0; i--){
-        colors[i] = '1,'+players[i].color;
+    for (let i = players.length - 1; i >= 0; i--) {
+        colors[i] = `1,${players[i].color}`;
         players[i].color = colors[i];
     }
 
     const pointsPlayer = new Map();
-    for (var i = players.length - 1; i >= 0; i--) {
+    for (let i = players.length - 1; i >= 0; i--) {
         pointsPlayer.set(players[i].name, 0);
     }
 
     const playerColor = new Map();
-    for (var i = players.length - 1; i >= 0; i--) {
+    for (let i = players.length - 1; i >= 0; i--) {
         playerColor.set(players[i].color, players[i].name);
     }
 
     // number of turns
-    let nbTurns = match.config.numberOfRounds;
+    const nbTurns = match.config.numberOfRounds;
 
     // create a fair array of color with the ones given in the config
     // multiply each color by the number of turn
@@ -86,6 +85,8 @@ async function start(match) {
     await Utilities.sleep(5000);
 
     let _waiting = false;
+    let choosenColor = randomColors.pop();
+    let _time = process.hrtime();
     client.subscribe(buttonSubscription);
 
     // We then wait someone to push the button on the thingy
@@ -107,7 +108,7 @@ async function start(match) {
                 console.log(err);
             }
             */
-            
+
 
             // END
             if (randomColors.length === 0) {
@@ -130,10 +131,9 @@ async function start(match) {
     });
 
     // when the color is randomly selected, remove it from the array
-    let choosenColor = randomColors.pop();
     client.publish(ledPublish, choosenColor);
     _waiting = true;
-    let _time = process.hrtime();
+    _time = process.hrtime();
 }
 
 async function stop(match) {

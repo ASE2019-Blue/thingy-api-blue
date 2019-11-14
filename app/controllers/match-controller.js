@@ -85,12 +85,10 @@ async function changeStatus(ctx, next) {
 async function subscribe(ctx, next) {
     const { code } = ctx.params;
     const { username } = ctx.state.user;
-    const user = await User.findOne({ username: username });
-    const match = await Match.MODEL.findOne({ code: code });
-    if(match == null)
-        ctx.throw(400, {error: 'Not a valid code!'});
-    if(match.players.indexOf(user._id)!=-1)
-        ctx.throw(400, {error: 'User already subscribed!'});
+    const user = await User.findOne({ username });
+    const match = await Match.MODEL.findOne({ code });
+    if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
+    if (match.players.indexOf(user._id) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
     match.players.push(user._id);
     match.save();
 
@@ -100,10 +98,9 @@ async function subscribe(ctx, next) {
 async function unsubscribe(ctx, next) {
     const { code } = ctx.params;
     const { username } = ctx.state.user;
-    const user = await User.findOne({ username: username });
-    const match = await Match.MODEL.findOne({ code: code });
-    if(match == null)
-        ctx.throw(400, {error: 'Not a valid code'});
+    const user = await User.findOne({ username });
+    const match = await Match.MODEL.findOne({ code });
+    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
     match.players.pull(user._id);
     match.save();
