@@ -1,5 +1,7 @@
 # thingy-api-blue
 
+[![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=develop)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
+
 ## Setup
 
 1.  Copy the file `.env.sample` to `.env` and adjust the configuration
