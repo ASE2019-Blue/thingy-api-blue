@@ -6,7 +6,8 @@
   "scripts": {
     "lint": "eslint --fix app/ || true",
     "server": "nodemon app/index.js",
-    "start": "echo 'This script is deprecated. Use `npm run server` instead.'"
+    "start": "echo 'This script is deprecated. Use `npm run server` instead.'",
+    "test": "echo 'Should run rests.' || true"
   },
   "keywords": [
     "rest",
