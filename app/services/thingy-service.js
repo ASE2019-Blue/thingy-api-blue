@@ -19,7 +19,7 @@ function recordThingyConnectionStatus() {
                 thingy.macAddress = thingyMAC;
             }
             // process a connected Thingy
-            if (message === 'true') {
+            if (message.toString() === 'true') {
                 // Thingy is now available
                 thingy.available = true;
                 try {
