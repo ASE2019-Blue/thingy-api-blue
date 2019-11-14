@@ -1,7 +1,7 @@
 const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
-const configThingy = require('../configThingy');
+const configThingy = require('../config-thingy');
 const IO = require('../index');
 
 const NS_PER_SEC = 1e9;
