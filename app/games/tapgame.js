@@ -2,6 +2,7 @@ const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../configThingy');
+const IO = require('../index');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -39,7 +40,7 @@ async function start(match) {
     const { client } = mqtt;
 
     // For development purpose only: hardcoded MAC
-    let thingyURI = match.thingys[0].macAddress;
+    const thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
 
@@ -50,11 +51,17 @@ async function start(match) {
     const colors = new Array(players.length);
     for(let i = players.length - 1; i >= 0; i--){
         colors[i] = '1,'+players[i].color;
+        players[i].color = colors[i];
     }
 
-    const results = new Map();
-    for (let i = colors.length - 1; i >= 0; i--) {
-        results.set(colors[i], 0);
+    const pointsPlayer = new Map();
+    for (var i = players.length - 1; i >= 0; i--) {
+        pointsPlayer.set(players[i].name, 0);
+    }
+
+    const playerColor = new Map();
+    for (var i = players.length - 1; i >= 0; i--) {
+        playerColor.set(players[i].color, players[i].name);
     }
 
     // number of turns
@@ -89,13 +96,23 @@ async function start(match) {
             // calcul for points : 100000 divided by time taken to push the button in milliseconds
             const diff = process.hrtime(_time);
             const timeInMilliseconds = (diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS;
-            results.set(choosenColor, results.get(choosenColor) + (100000 / timeInMilliseconds));
+            const playerName = playerColor.get(choosenColor);
+            pointsPlayer.set(playerName, pointsPlayer.get(playerName) + Math.round(100000 / timeInMilliseconds));
+
+            /*
+            try{
+                //websocket: notification to clients connected to the match with actual points of the player
+                IO.to(match._id).emit('points', {player: playerName, points: pointsPlayer.get(playerName)});
+            }catch(err){
+                console.log(err);
+            }
+            */
+            
 
             // END
             if (randomColors.length === 0) {
                 client.unsubscribe(buttonSubscription);
-                // TODO : attribute each color points to the user who have it
-                console.log(results);
+                console.log(pointsPlayer);
                 // change state of the match
                 await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
                 client.publish(ledPublish, configThingy.colors.favorite);
@@ -120,8 +137,7 @@ async function start(match) {
 }
 
 async function stop(match) {
-    // let thingyURI = match.config.thingys[0].macAddress;
-    const thingyURI = 'e3:af:9b:f4:a1:c7';
+    const thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
