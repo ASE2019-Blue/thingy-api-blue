@@ -46,7 +46,7 @@ async function start(match) {
 
     
     // array of players
-    let players = match.config.players;
+    let players = match.players;
     // array of selected colors by the client
     const colors = new Array(players.length);
     for(let i = players.length - 1; i >= 0; i--){

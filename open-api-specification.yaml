@@ -164,6 +164,36 @@ paths:
           description: Match not found
         500:
           description: Unexpected error
+          
+  /matches/invitations/{code}:
+    post:
+      summary: Player enteres the game
+      tags: ['Matches']
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Not a valid code or user already subscribed
+    delete:
+      summary: Player exits the game
+      tags: ['Matches']
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Not a valid code
   
   /sign-up:
     post:

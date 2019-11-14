@@ -1,5 +1,6 @@
 const Game = require('../models/game-model');
 const Match = require('../models/match-model');
+const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const Tapgame = require('../games/tapgame');
 
@@ -81,8 +82,39 @@ async function changeStatus(ctx, next) {
     ctx.status = 200;
 }
 
+async function subscribe(ctx, next) {
+    const { code } = ctx.params;
+    const { username } = ctx.state.user;
+    const user = await User.findOne({ username: username });
+    const match = await Match.MODEL.findOne({ code: code });
+    if(match == null)
+        ctx.throw(400, {error: 'Not a valid code!'});
+    if(match.players.indexOf(user._id)!=-1)
+        ctx.throw(400, {error: 'User already subscribed!'});
+    match.players.push(user._id);
+    match.save();
+
+    ctx.status = 200;
+}
+
+async function unsubscribe(ctx, next) {
+    const { code } = ctx.params;
+    const { username } = ctx.state.user;
+    const user = await User.findOne({ username: username });
+    const match = await Match.MODEL.findOne({ code: code });
+    if(match == null)
+        ctx.throw(400, {error: 'Not a valid code'});
+
+    match.players.pull(user._id);
+    match.save();
+
+    ctx.status = 200;
+}
+
 module.exports = {
     findAll,
     find,
     changeStatus,
+    subscribe,
+    unsubscribe,
 };

@@ -1,6 +1,8 @@
 const Game = require('../models/game-model');
 const Match = require('../models/match-model');
+const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
+const CodeGenerator = require('../services/invitation-service');
 /**
  * Find all games.
  *
@@ -46,6 +48,9 @@ async function addMatch(ctx, next) {
     match.owner = username;
     match.config = matchDto.config;
     match.thingys = matchDto.thingys;
+    const user = await User.findOne({ username });
+    match.players.push(user._id);
+    match.code = CodeGenerator.makeCode(5);
 
     await match.save();
     ctx.body = match;
