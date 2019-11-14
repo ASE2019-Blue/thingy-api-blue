@@ -1,6 +1,7 @@
 # thingy-api-blue
 
 [![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=develop)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ase2019-blue%3Athingy-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=ase2019-blue%3Athingy-api)
 
 ## Setup
 
