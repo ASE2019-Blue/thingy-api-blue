@@ -2,4 +2,9 @@ language: node_js
 node_js:
   - 10
 script:
-  - npm test
+  - npm test -- --coverage
+  - sonar-scanner
+  - npm run lint
+addons:
+  sonarcloud:
+    organization: ase2019-blue
