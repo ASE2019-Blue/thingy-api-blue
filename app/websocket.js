@@ -24,7 +24,7 @@ websocketApp.ws.use((ctx) => {
     ctx.websocket.on('message', (message) => {
         console.log(message);
         // Move a client to a match
-        if (message.includes('matchCode')) {
+        if (message.includes('move')) {
             try {
                 const msg = JSON.parse(message);
                 const { matchCode } = msg;
@@ -32,7 +32,6 @@ websocketApp.ws.use((ctx) => {
                 console.log(`${playerName} moved to match ${matchCode}`);
                 ctx.websocket._id = matchCode;
                 ctx.websocket.playerName = playerName;
-                ctx.websocket.send(`You have been moved to match: ${ctx.websocket._id}`);
                 const joinMsg = { msg: 'join', player: playerName };
                 websocketApp.ws.server.clients.forEach((user) => {
                     if (user._id === matchCode) {
@@ -48,6 +47,21 @@ websocketApp.ws.use((ctx) => {
                 ctx.websocket.send(`Client id: ${ctx.websocket._id}, Name : ${ctx.websocket.playerName}`);
             } catch (error) {
                 ctx.websocket.send('Error : problem with socket informations');
+            }
+        // Retrieve the list of the players for a given match
+        } else if (message.includes('playerList')) {
+            try {
+                const msg = JSON.parse(message);
+                const { matchCode } = msg;
+                const players = [];
+                websocketApp.ws.server.clients.forEach((user) => {
+                    if (user._id === matchCode) {
+                        players.push(user.playerName);
+                    }
+                });
+                ctx.websocket.send(JSON.stringify(players));
+            } catch (error) {
+                ctx.websocket.send('Error : problem while getting the list of the players');
             }
         } else {
             ctx.websocket.send('Error : message not recognized');
