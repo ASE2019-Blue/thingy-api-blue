@@ -11,3 +11,8 @@ WEBSOCKET MESSAGES HANDLER :
 - Retrieve the list of the players for a given match code :
 	Message to send to websocket server : example -> {"msg" : "playerList", "matchCode" : "X25"}
 	Expected reply : ["Loic", "Daniel", "Christian"]
+
+
+DURING TAP-GAME :
+- Message with the points of the current player is sent to every player in that match
+	example : {"msg" : "points", "player": "Loic", "points" : "2945" }
