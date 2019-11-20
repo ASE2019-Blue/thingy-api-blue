@@ -49,7 +49,7 @@ async function addMatch(ctx, next) {
     match.config = matchDto.config;
     match.thingys = matchDto.thingys;
     const user = await User.findOne({ username });
-    match.players.push(user._id);
+    match.players.push(user.username);
     match.code = CodeGenerator.makeCode(5);
 
     await match.save();

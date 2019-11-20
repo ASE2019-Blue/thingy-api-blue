@@ -18,7 +18,8 @@ const MatchSchema = new mongoose.Schema({
         required: true,
     },
     players: [{
-        type: mongoose.Schema.Types.ObjectId,
+        // type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: 'User',
         required: true,
     }],
