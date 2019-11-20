@@ -1,4 +1,5 @@
 const Game = require('../models/game-model');
+const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
 const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
@@ -56,8 +57,51 @@ async function addMatch(ctx, next) {
     ctx.body = match;
 }
 
+async function addRating(ctx, next) {
+    const { username } = ctx.state.user;
+    const { gameKey } = ctx.params;
+    const { rating } = ctx.request.body;
+
+    if (!Game.GAME_KEYS.includes(gameKey)) {
+        ctx.throw(404, { error: 'Game not found' });
+    }
+
+    let ratingEntry = await GameRating.findOne({ username, gameKey });
+    if (typeof ratingEntry === 'undefined' || ratingEntry == null) { ratingEntry = new GameRating(); }
+
+    ratingEntry.username = username;
+    ratingEntry.gameKey = gameKey;
+    ratingEntry.rating = rating;
+
+    await ratingEntry.save();
+    ctx.status = 200;
+}
+
+async function getRating(ctx, next) {
+    const { username } = ctx.state.user;
+    const { gameKey } = ctx.params;
+
+    if (!Game.GAME_KEYS.includes(gameKey)) {
+        ctx.throw(404, { error: 'Game not found' });
+    }
+
+    const ratingEntries = await GameRating.find({ username, gameKey });
+
+    let numberOfRatings = 0;
+    let totalValue = 0;
+
+    ratingEntries.forEach((value) => {
+        numberOfRatings += 1;
+        totalValue += value.rating;
+    });
+
+    ctx.body = totalValue / numberOfRatings;
+}
+
 
 module.exports = {
     findAll,
     addMatch,
+    addRating,
+    getRating,
 };
