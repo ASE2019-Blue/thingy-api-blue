@@ -105,7 +105,7 @@ async function start(match) {
                 // websocket: notification to users connected to the match with actual points of the player
                 const msg = { msg: 'points', player: playerName, points: pointsPlayer.get(playerName) };
                 websocket.ws.server.clients.forEach((user) => {
-                    if (user._id === match._id) {
+                    if (user._id === match.code) {
                         user.send(JSON.stringify(msg));
                     }
                 });

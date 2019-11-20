@@ -24,22 +24,30 @@ websocketApp.ws.use((ctx) => {
     ctx.websocket.on('message', (message) => {
         console.log(message);
         // Move a client to a match
-        if (message.includes('matchId')) {
+        if (message.includes('matchCode')) {
             try {
                 const msg = JSON.parse(message);
-                const { matchId } = msg;
-                console.log(`Client moved to match ${matchId}`);
-                ctx.websocket._id = matchId;
+                const { matchCode } = msg;
+                const { playerName } = msg;
+                console.log(`${playerName} moved to match ${matchCode}`);
+                ctx.websocket._id = matchCode;
+                ctx.websocket.playerName = playerName;
                 ctx.websocket.send(`You have been moved to match: ${ctx.websocket._id}`);
+                const joinMsg = { msg: 'join', player: playerName };
+                websocketApp.ws.server.clients.forEach((user) => {
+                    if (user._id === matchCode) {
+                        user.send(JSON.stringify(joinMsg));
+                    }
+                });
             } catch (error) {
-                ctx.websocket.send('Error : The message is not json typed.');
+                ctx.websocket.send('Error will parsing the client configuration sent');
             }
         // Test what id the client have
         } else if (message.includes('testId')) {
             try {
-                ctx.websocket.send(`Client id: ${ctx.websocket._id}`);
+                ctx.websocket.send(`Client id: ${ctx.websocket._id}, Name : ${ctx.websocket.playerName}`);
             } catch (error) {
-                ctx.websocket.send('Error : problem with id.');
+                ctx.websocket.send('Error : problem with socket informations');
             }
         } else {
             ctx.websocket.send('Error : message not recognized');
