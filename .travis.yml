@@ -16,9 +16,9 @@ script:
   - npm run lint
 
 before_deploy:
-  - docker build --no-cache -t christianfries:${TRAVIS_COMMIT} .
+  - docker build --no-cache -t christianfries/thingy-api-blue:${TRAVIS_COMMIT} .
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker push christianfries:${TRAVIS_COMMIT}
+  - docker push christianfries/thingy-api-blue:${TRAVIS_COMMIT}
 
 deploy:
   provider: script
