@@ -1,10 +1,25 @@
 language: node_js
+
 node_js:
   - 10
+
+services:
+  - docker
+
+addons:
+  sonarcloud:
+    organization: ase2019-blue
+
 script:
   - npm test -- --coverage
   - sonar-scanner
   - npm run lint
-addons:
-  sonarcloud:
-    organization: ase2019-blue
+
+before_deploy:
+  - docker build --no-cache -t christianfries:${TRAVIS_COMMIT} .
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push christianfries:${TRAVIS_COMMIT}
+
+deploy:
+  provider: script
+  script: echo 'Should deploy now.'
