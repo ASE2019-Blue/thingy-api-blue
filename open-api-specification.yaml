@@ -423,6 +423,25 @@ components:
       properties:
         token:
           type: string
+    Game:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - icon
+        - rating
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        rating:
+          type: number
     Match:
       allOf:
         - $ref: '#/components/schemas/MatchDto'
@@ -483,22 +502,6 @@ components:
         currentPassword:
           type: string
         newPassword:
-          type: string
-    Game:
-      type: object
-      required:
-        - key
-        - title
-        - description
-        - icon
-      properties:
-        key:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
-        icon:
           type: string
     Thingy:
       type: object

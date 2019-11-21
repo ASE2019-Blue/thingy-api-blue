@@ -4,6 +4,21 @@ const Match = require('../models/match-model');
 const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
+
+async function calculateRating(gameKey){
+    const ratingEntries = await GameRating.find({ gameKey });
+
+    let numberOfRatings = 0;
+    let totalValue = 0;
+
+    ratingEntries.forEach((value) => {
+        numberOfRatings += 1;
+        totalValue += value.rating;
+    });
+    let average = totalValue / numberOfRatings;
+    return average
+}
+
 /**
  * Find all games.
  *
@@ -15,7 +30,13 @@ async function findAll(ctx, next) {
     // Add some latency for better async testing
     // TODO Remove after development
     await Utilities.sleep(800);
-    ctx.body = Game.GAMES;
+    let games = Game.GAMES;
+    for(let i = 0 ; i < games.length ; i++) {
+        average = await calculateRating(games[i].key);
+        // if(average !== NaN)
+            games[i]['rating'] = average;
+    }
+    ctx.body = games;
 }
 
 /**
@@ -78,24 +99,13 @@ async function addRating(ctx, next) {
 }
 
 async function getRating(ctx, next) {
-    const { username } = ctx.state.user;
     const { gameKey } = ctx.params;
 
     if (!Game.GAME_KEYS.includes(gameKey)) {
         ctx.throw(404, { error: 'Game not found' });
     }
 
-    const ratingEntries = await GameRating.find({ username, gameKey });
-
-    let numberOfRatings = 0;
-    let totalValue = 0;
-
-    ratingEntries.forEach((value) => {
-        numberOfRatings += 1;
-        totalValue += value.rating;
-    });
-
-    ctx.body = totalValue / numberOfRatings;
+    ctx.body = calculateRating(gameKey);
 }
 
 
