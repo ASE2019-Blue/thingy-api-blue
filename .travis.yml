@@ -23,3 +23,5 @@ before_deploy:
 deploy:
   provider: script
   script: echo 'Should deploy now.'
+  on:
+    branch: develop
