@@ -44,7 +44,7 @@ paths:
           description: Successful operation
         400:
           description: Invalid input
-          
+
   /demo/end:
     post:
       summary: Stops the demo for sprint 1
@@ -99,7 +99,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-                
+
   /matches:
     get:
       summary: Get list of matches
@@ -113,7 +113,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
-  
+
   /matches/{matchId}:
     get:
       summary: Get specific match
@@ -135,7 +135,7 @@ paths:
                   $ref: '#/components/schemas/Match'
         404:
           description: Match not found
-                  
+
   /matches/{matchId}/state:
     put:
       summary: Change match state
@@ -164,7 +164,7 @@ paths:
           description: Match not found
         500:
           description: Unexpected error
-          
+
   /matches/invitations/{code}:
     post:
       summary: Player enteres the game
@@ -194,7 +194,7 @@ paths:
           description: Successful opeation
         400:
           description: Not a valid code
-  
+
   /sign-up:
     post:
       summary: Sign up a new user

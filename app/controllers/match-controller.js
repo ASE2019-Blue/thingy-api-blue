@@ -83,15 +83,18 @@ async function changeStatus(ctx, next) {
 }
 
 async function subscribe(ctx, next) {
+    // attribute a color to user (check disponibolity of the colors)
+    // error : user is not inserted in db..
     const { code } = ctx.params;
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
-    if (match.players.indexOf(user._id) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
-    match.players.push(user._id);
+    if (match.players.indexOf(user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
+    match.players.push(user.username);
     match.save();
 
+    ctx.body = match;
     ctx.status = 200;
 }
 
@@ -102,7 +105,7 @@ async function unsubscribe(ctx, next) {
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
-    match.players.pull(user._id);
+    match.players.pull(user.username);
     match.save();
 
     ctx.status = 200;
