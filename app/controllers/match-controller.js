@@ -83,18 +83,18 @@ async function changeStatus(ctx, next) {
 }
 
 async function subscribe(ctx, next) {
-    // attribute a color to user (check disponibolity of the colors)
-    // error : user is not inserted in db..
+
+    // push to the websocket ?
     const { code } = ctx.params;
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
-    if (match.players.indexOf(user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
-    match.players.push(user.username);
-    match.save();
+    if (match.players.findIndex(p => p.name == user.username) != -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    ctx.body = match;
+    match.players.push({name: user.username, color: "0,0,0"});// todo check disponibolity of the colors
+    match.save();
+    ctx.body = match; // returns a match, add in api doc
     ctx.status = 200;
 }
 
@@ -105,9 +105,11 @@ async function unsubscribe(ctx, next) {
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
-    match.players.pull(user.username);
-    match.save();
+    var playerIndex = match.players.findIndex(p => p.name === user.username);
+    if (playerIndex == -1) { ctx.throw(400, { error: 'Player not found!' }); }
 
+    match.players.splice(playerIndex, 1);
+    match.save();
     ctx.status = 200;
 }
 
