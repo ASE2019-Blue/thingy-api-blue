@@ -50,7 +50,7 @@ async function addMatch(ctx, next) {
     match.thingys = matchDto.thingys;
     const user = await User.findOne({ username });
     match.players = matchDto.config.players;
-    match.players.push({name : user.username, color: "255,0,0"});
+    match.players.push({name : user.username, color: "255,0,0", score: "0"});
     match.code = CodeGenerator.makeCode(5);
 
     await match.save();

@@ -92,7 +92,7 @@ async function subscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex(p => p.name == user.username) != -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    match.players.push({name: user.username, color: "0,0,0"});// todo check disponibolity of the colors
+    match.players.push({name: user.username, color: "0,0,0", score: "0"});// todo check disponibolity of the colors
     match.save();
     ctx.body = match; // returns a match, add in api doc
     ctx.status = 200;
