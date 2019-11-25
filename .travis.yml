@@ -22,6 +22,9 @@ before_deploy:
 
 deploy:
   provider: script
-  script: echo 'Should deploy now.'
+  script: bash .travis/deploy_develop.sh
   on:
     branch: develop
+
+before_install:
+  - openssl aes-256-cbc -K $encrypted_db5fe3a4ccc4_key -iv $encrypted_db5fe3a4ccc4_iv -in .travis/id_rsa.enc -out .travis/id_rsa -d
