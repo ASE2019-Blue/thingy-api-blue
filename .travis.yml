@@ -24,5 +24,6 @@ before_deploy:
 deploy:
   provider: script
   script: bash .travis/deploy_develop.sh
+  skip_cleanup: true
   on:
     branch: develop

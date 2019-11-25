@@ -1,9 +1,5 @@
 #!/bin/bash
 
-ls -la ../
-ls -la ./
-ls -la .travis/
-
 eval "$(ssh-agent -s)"
 chmod 600 ./.travis/id_rsa
 ssh-add ./.travis/id_rsa
