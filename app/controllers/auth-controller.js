@@ -12,6 +12,8 @@ const User = require('../models/user-model');
 async function createToken(ctx, next) {
     const userCredentialsDto = ctx.request.body;
 
+    console.log(userCredentialsDto);
+
     // TODO Validate user input
     const user = await User.findOne({ username: userCredentialsDto.username });
     if (!user) {
