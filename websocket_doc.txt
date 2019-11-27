@@ -1,0 +1,18 @@
+WEBSOCKET MESSAGES HANDLER :
+
+- Move a client to a match :
+	Message to send to websocket server : example -> {"msg" : "move", "matchCode" : "X25", "playerName" : "Loic"}
+	Expected reply : {"msg":"join","player":"Loic"}
+
+- Retrieve the id and name given to a socket connection :
+	Message to send to websocket server : {"msg" : "testId"}
+	Expected reply : "Client id: X25, Name : Loic"
+
+- Retrieve the list of the players for a given match code :
+	Message to send to websocket server : example -> {"msg" : "playerList", "matchCode" : "X25"}
+	Expected reply : ["Loic", "Daniel", "Christian"]
+
+
+DURING TAP-GAME :
+- Message with the points of the current player is sent to every player in that match
+	example : {"msg" : "points", "player": "Loic", "points" : "2945" }

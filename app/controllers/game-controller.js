@@ -68,10 +68,11 @@ async function addMatch(ctx, next) {
     const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
-    match.config = matchDto.config;
+    match.config = {numberOfRounds: matchDto.config.numberOfRounds};
     match.thingys = matchDto.thingys;
     const user = await User.findOne({ username });
-    match.players.push(user._id);
+    match.players = matchDto.config.players;
+    match.players.push({name : user.username, color: "255,0,0", score: "0"});
     match.code = CodeGenerator.makeCode(5);
 
     await match.save();

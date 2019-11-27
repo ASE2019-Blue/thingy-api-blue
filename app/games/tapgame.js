@@ -2,6 +2,7 @@ const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
+const websocket = require('../websocket');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -100,15 +101,17 @@ async function start(match) {
             const playerName = playerColor.get(choosenColor);
             pointsPlayer.set(playerName, pointsPlayer.get(playerName) + Math.round(100000 / timeInMilliseconds));
 
-            /*
-            try{
-                //websocket: notification to clients connected to the match with actual points of the player
-                IO.to(match._id).emit('points', {player: playerName, points: pointsPlayer.get(playerName)});
-            }catch(err){
+            try {
+                // websocket: notification to users connected to the match with actual points of the player
+                const msg = { msg: 'points', player: playerName, points: pointsPlayer.get(playerName) };
+                websocket.ws.server.clients.forEach((user) => {
+                    if (user._id === match.code) {
+                        user.send(JSON.stringify(msg));
+                    }
+                });
+            } catch (err) {
                 console.log(err);
             }
-            */
-
 
             // END
             if (randomColors.length === 0) {
@@ -142,7 +145,7 @@ async function stop(match) {
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
+    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: {$in: [Match.STATE_CREATED, Match.STATE_RUNNING]}}, { state: Match.STATE_FINISHED });
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, configThingy.colors.favorite);

@@ -8,6 +8,7 @@ router.get('/', Ctrl.findAll)
     .get('/:matchId', Ctrl.find)
     .post('/invitations/:code', Ctrl.subscribe)
     .del('/invitations/:code', Ctrl.unsubscribe)
-    .put('/:matchId/state', Ctrl.changeStatus);
+    .put('/:matchId/state', Ctrl.changeStatus)
+    .put('/:matchId/players', Ctrl.updatePlayers);
 
 module.exports = router.routes();
