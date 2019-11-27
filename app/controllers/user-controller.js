@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user-model');
+const Thingy = require('../models/thingy-model');
 const Utilities = require('../services/utility-service');
 
 const USER_FIELDS_PROFILE_SHORT = 'username createdAt -_id';
@@ -113,9 +114,34 @@ async function changePassword(ctx, next) {
     ctx.status = 200;
 }
 
+async function changeFavoriteThingy(ctx, next){
+    const { username } = ctx.params;
+    const usernameOfLoggedInUser = ctx.state.user.username;
+    const {thingy} = ctx.request.body;
+
+    if (username !== usernameOfLoggedInUser) {
+        ctx.throw(400, 'You can not change values of someone else');
+    }
+
+    let user = await User.findOne({username:usernameOfLoggedInUser});
+
+    if(typeof thingy === 'undefined'){
+        user.favoriteThingy = null;
+    } else {
+        let thingyObj = await Thingy.findById(thingy);
+        if(thingyObj == null)
+            ctx.throw(404, 'Thingy not found');
+        user.favoriteThingy = thingy;
+    }
+    await user.save();
+
+    ctx.status = 200;
+}
+
 module.exports = {
     findAll,
     findOne,
     change,
     changePassword,
+    changeFavoriteThingy,
 };

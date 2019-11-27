@@ -100,6 +100,38 @@ paths:
               schema:
                 $ref: '#/components/schemas/Match'
 
+  /games/{gameKey}/rating:
+    get:
+      summary: Get the average rating of the game
+      tags: ['Games']
+      parameters:
+        - name: gameKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: number
+    post:
+      summary: Sets a rating for the actual player for that game
+      tags: ['Games']
+      parameters:
+        - name: gameKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+        404:
+          description: Game not found
+
   /matches:
     get:
       summary: Get list of matches
@@ -389,6 +421,32 @@ paths:
         404:
           description: User not found
 
+  /users/{username}/thingy:
+    put:
+      summary: Change the favorite thingy of the current user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Thingy Id
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        200:
+          description: Success
+        400:
+          description: Invalid request
+        404:
+          description: Thingy not found
+
 components:
   securitySchemes:
     basicAuth:
@@ -402,6 +460,25 @@ components:
       properties:
         token:
           type: string
+    Game:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - icon
+        - rating
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        rating:
+          type: number
     Match:
       allOf:
         - $ref: '#/components/schemas/MatchDto'
@@ -467,22 +544,6 @@ components:
         currentPassword:
           type: string
         newPassword:
-          type: string
-    Game:
-      type: object
-      required:
-        - key
-        - title
-        - description
-        - icon
-      properties:
-        key:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
-        icon:
           type: string
     Thingy:
       type: object

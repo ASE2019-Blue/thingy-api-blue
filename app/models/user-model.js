@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema(
         lastName: {
             type: String,
         },
+        favoriteThingy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Thingy',
+        },
     }, {
         timestamps: true,
     },
