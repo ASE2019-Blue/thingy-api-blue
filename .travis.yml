@@ -10,9 +10,6 @@ addons:
   sonarcloud:
     organization: ase2019-blue
 
-before_install:
-  - git stash --all
-
 script:
   - npm test -- --coverage
   - sonar-scanner
