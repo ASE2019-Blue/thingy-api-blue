@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Thingy API
-  version: '2.0.0-dev'
+  version: '3.0.0-dev'
 servers:
   - url: 'http://localhost:3000/'
 security:
