@@ -44,7 +44,7 @@ paths:
           description: Successful operation
         400:
           description: Invalid input
-          
+
   /demo/end:
     post:
       summary: Stops the demo for sprint 1
@@ -99,7 +99,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Match'
-                
+
   /games/{gameKey}/rating:
     get:
       summary: Get the average rating of the game
@@ -131,7 +131,7 @@ paths:
           description: Successful opeation
         404:
           description: Game not found
-                
+
   /matches:
     get:
       summary: Get list of matches
@@ -145,7 +145,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Match'
-  
+
   /matches/{matchId}:
     get:
       summary: Get specific match
@@ -167,7 +167,7 @@ paths:
                   $ref: '#/components/schemas/Match'
         404:
           description: Match not found
-                  
+
   /matches/{matchId}/state:
     put:
       summary: Change match state
@@ -196,7 +196,40 @@ paths:
           description: Match not found
         500:
           description: Unexpected error
-          
+
+  /matches/{matchId}/players:
+    put:
+      summary: Change match players array
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: playersArray
+        content:
+          application/json:
+            schema:
+              properties:
+                playersArray:
+                  type: array
+                  items:
+                    type: object
+                    description: '{name: "Example", color: "0, 0, 0", score: "0"}'
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Match'
+        404:
+          description: Match not found
+
   /matches/invitations/{code}:
     post:
       summary: Player enteres the game
@@ -209,7 +242,11 @@ paths:
             type: string
       responses:
         200:
-          description: Successful opeation
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Match'
         400:
           description: Not a valid code or user already subscribed
     delete:
@@ -226,7 +263,7 @@ paths:
           description: Successful opeation
         400:
           description: Not a valid code
-  
+
   /sign-up:
     post:
       summary: Sign up a new user
@@ -383,7 +420,7 @@ paths:
           description: Invalid request
         404:
           description: User not found
-          
+
   /users/{username}/thingy:
     put:
       summary: Change the favorite thingy of the current user
@@ -423,6 +460,25 @@ components:
       properties:
         token:
           type: string
+    Game:
+      type: object
+      required:
+        - key
+        - title
+        - description
+        - icon
+        - rating
+      properties:
+        key:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        rating:
+          type: number
     Match:
       allOf:
         - $ref: '#/components/schemas/MatchDto'
@@ -455,6 +511,11 @@ components:
               items:
                 type: string
                 description: Thingy id
+            players:
+              type: array
+              items:
+                type: object
+                description: '{name: "Example", color: "0, 0, 0", score: "0"}'
             createdAt:
               type: string
               format: datetime
@@ -483,22 +544,6 @@ components:
         currentPassword:
           type: string
         newPassword:
-          type: string
-    Game:
-      type: object
-      required:
-        - key
-        - title
-        - description
-        - icon
-      properties:
-        key:
-          type: string
-        title:
-          type: string
-        description:
-          type: string
-        icon:
           type: string
     Thingy:
       type: object

@@ -38,6 +38,31 @@ async function find(ctx, next) {
     ctx.body = match;
 }
 
+
+
+/**
+ * Find one match by id.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function updatePlayers(ctx, next) {
+
+    const { matchId } = ctx.params;
+    const { playersArray } = ctx.request.body;
+    const match = await Match.MODEL.findOne({ _id: matchId });
+    if (match === null) ctx.throw(404, { error: 'Match not found' });
+
+    console.log(playersArray);
+
+    match.players = playersArray;
+    match.save();
+
+    ctx.status = 200;
+    ctx.body = match;
+}
+
 /**
  * Change the state of a match.
  *
@@ -83,15 +108,18 @@ async function changeStatus(ctx, next) {
 }
 
 async function subscribe(ctx, next) {
+
+    // push to the websocket ?
     const { code } = ctx.params;
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
-    if (match.players.indexOf(user._id) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
-    match.players.push(user._id);
-    match.save();
+    if (match.players.findIndex(p => p.name == user.username) != -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
+    match.players.push({name: user.username, color: "125, 125, 0", score: "0"});// todo check disponibolity of the colors
+    match.save();
+    ctx.body = match; // returns a match
     ctx.status = 200;
 }
 
@@ -102,15 +130,18 @@ async function unsubscribe(ctx, next) {
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
-    match.players.pull(user._id);
-    match.save();
+    var playerIndex = match.players.findIndex(p => p.name === user.username);
+    if (playerIndex == -1) { ctx.throw(400, { error: 'Player not found!' }); }
 
+    match.players.splice(playerIndex, 1);
+    match.save();
     ctx.status = 200;
 }
 
 module.exports = {
     findAll,
     find,
+    updatePlayers,
     changeStatus,
     subscribe,
     unsubscribe,

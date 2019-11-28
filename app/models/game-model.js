@@ -9,7 +9,7 @@ const GAMES = [
     {
         key: TAP_GAME,
         title: 'Tap Game',
-        description: 'This is an interrcative game to test your reaction time and for having fun with your '
+        description: 'This is an interactive game to test your reaction time and for having fun with your '
         + 'friends. The goal is to tap the THINGY as fast as possible once it is your turn.\n\nFor this purpose, '
         + 'a colour is assigned to each player. The players then sit or stand (or lay) around the THINGY and as '
         + 'soon as a colour appears, the respective player must hurry and tap the THINGY. The faster he is, the '

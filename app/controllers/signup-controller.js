@@ -16,7 +16,7 @@ async function signUp(ctx, next) {
     try {
     // TODO Validate user input
         const hash = await bcrypt.hash(userDto.password, 12);
-        //user._id = userDto.username;
+        // user._id = userDto.username;
         user.username = userDto.username;
         user.firstName = userDto.firstName != null ? userDto.firstName : '';
         user.lastName = userDto.lastName != null ? userDto.lastName : '';
