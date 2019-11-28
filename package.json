@@ -1,6 +1,6 @@
 {
   "name": "thingy-api-blue",
-  "version": "2.0.0-dev",
+  "version": "3.0.0-dev",
   "description": "Thingy API of team blue",
   "main": "app/index.js",
   "scripts": {
