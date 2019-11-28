@@ -34,7 +34,7 @@ async function find(ctx, next) {
     const { matchId } = ctx.params;
     await Utilities.sleep(800);
     const match = await Match.MODEL.findOne({ _id: matchId });
-    if (match === null) ctx.throw(404, { error: 'Match not found' });
+    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
     ctx.body = match;
 }
 
@@ -52,7 +52,7 @@ async function updatePlayers(ctx, next) {
     const { matchId } = ctx.params;
     const { playersArray } = ctx.request.body;
     const match = await Match.MODEL.findOne({ _id: matchId });
-    if (match === null) ctx.throw(404, { error: 'Match not found' });
+    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
 
     console.log(playersArray);
 
@@ -77,7 +77,7 @@ async function changeStatus(ctx, next) {
     if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
-    if (match === null) ctx.throw(404, { error: 'Match not found' });
+    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
     const { gameKey } = match;
     try {
         switch (state) {
