@@ -1,7 +1,6 @@
 # thingy-api-blue
 
-[![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=develop)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ase2019-blue%3Athingy-api&metric=alert_status)](https://sonarcloud.io/dashboard?id=ase2019-blue%3Athingy-api)
+[![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=master)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
 
 ## Setup
 
@@ -20,3 +19,7 @@ To apply the coding standards to the codebase automatically, run `npm run lint`.
 ## Travis CI
 
 This project uses [Travis CI](https://travis-ci.com/dashboard) as a continuous integration tool.
+
+## Docker
+
+To run this project in a docker container, run `docker run -d -p 3000:3000 -p 3001:3001 christianfries/thingy-api-blue`.
