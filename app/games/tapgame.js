@@ -2,7 +2,7 @@ const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
-const websocket = require('../websocket');
+const Wss = require('../websocket');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -99,13 +99,19 @@ async function start(match) {
             const diff = process.hrtime(_time);
             const timeInMilliseconds = (diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS;
             const playerName = playerColor.get(choosenColor);
+            // set the points
             pointsPlayer.set(playerName, pointsPlayer.get(playerName) + Math.round(100000 / timeInMilliseconds));
-
+            match.players.forEach((player) => {
+                if (player.name === playerName) {
+                    player.score = pointsPlayer.get(playerName);
+                }
+            });
+            await Match.MODEL.findOneAndUpdate({ _id: match._id }, { players: match.players });
             try {
-                // websocket: notification to users connected to the match with actual points of the player
+                // websocket: notification to clients connected to the match with actual points of the player
                 const msg = { msg: 'points', player: playerName, points: pointsPlayer.get(playerName) };
-                websocket.ws.server.clients.forEach((user) => {
-                    if (user._id === match.code) {
+                Wss.clients.forEach((user) => {
+                    if (user.matchCode === match.code) {
                         user.send(JSON.stringify(msg));
                     }
                 });
@@ -145,7 +151,12 @@ async function stop(match) {
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: {$in: [Match.STATE_CREATED, Match.STATE_RUNNING]}}, { state: Match.STATE_FINISHED });
+    await Match.MODEL.findOneAndUpdate(
+        {
+            _id: match._id,
+            state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] },
+        }, { state: Match.STATE_FINISHED },
+    );
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, configThingy.colors.favorite);

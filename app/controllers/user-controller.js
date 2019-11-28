@@ -114,23 +114,22 @@ async function changePassword(ctx, next) {
     ctx.status = 200;
 }
 
-async function changeFavoriteThingy(ctx, next){
+async function changeFavoriteThingy(ctx, next) {
     const { username } = ctx.params;
     const usernameOfLoggedInUser = ctx.state.user.username;
-    const {thingy} = ctx.request.body;
+    const { thingy } = ctx.request.body;
 
     if (username !== usernameOfLoggedInUser) {
         ctx.throw(400, 'You can not change values of someone else');
     }
 
-    let user = await User.findOne({username:usernameOfLoggedInUser});
+    const user = await User.findOne({ username: usernameOfLoggedInUser });
 
-    if(typeof thingy === 'undefined'){
+    if (typeof thingy === 'undefined') {
         user.favoriteThingy = null;
     } else {
-        let thingyObj = await Thingy.findById(thingy);
-        if(thingyObj == null)
-            ctx.throw(404, 'Thingy not found');
+        const thingyObj = await Thingy.findById(thingy);
+        if (thingyObj == null) { ctx.throw(404, 'Thingy not found'); }
         user.favoriteThingy = thingy;
     }
     await user.save();

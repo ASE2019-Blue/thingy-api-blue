@@ -1,9 +1,11 @@
 const Game = require('../models/game-model');
 const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
-const User = require('../models/user-model');
+// const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
+const ConfigThingy = require('../config-thingy');
+const Wss = require('../websocket');
 
 async function calculateRating(gameKey) {
     const ratingEntries = await GameRating.find({ gameKey });
@@ -31,12 +33,30 @@ async function findAll(ctx, next) {
     // TODO Remove after development
     await Utilities.sleep(800);
     const games = Game.GAMES;
-    for (let i = 0 ; i < games.length; i++) {
-        const average = await calculateRating(games[i].key);
+    for (let i = 0; i < games.length; i++) {
+        const average = calculateRating(games[i].key);
         // if(average !== NaN)
-        games[i]['rating'] = average;
+        games[i].rating = average;
     }
     ctx.body = games;
+}
+
+/**
+ * Find colors for players which work on the thingy.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function getColors(ctx, next) {
+    // Add some latency for better async testing
+    // TODO Remove after development
+    await Utilities.sleep(800);
+    const { colors } = ConfigThingy;
+    delete colors.favorite;
+    delete colors.none;
+    const colorsArray = Object.values(colors);
+    ctx.body = colorsArray;
 }
 
 /**
@@ -64,18 +84,33 @@ async function addMatch(ctx, next) {
         ctx.throw(400, { error: 'You need to provide a list of thingys to use for the match' });
     }
 
+    if (typeof matchDto.colors === 'undefined') {
+        ctx.throw(400, { error: 'You need to provide a table with the colors available and not available anymore.' });
+    }
+
     const { username } = ctx.state.user;
     const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
     match.config = { numberOfRounds: matchDto.config.numberOfRounds };
     match.thingys = matchDto.thingys;
-    const user = await User.findOne({ username });
+    // const user = await User.findOne({ username });
     match.players = matchDto.config.players;
-    match.players.push({ name : user.username, color: "255,0,0", score: "0" });
     match.code = CodeGenerator.makeCode(5);
-
+    match.colors = matchDto.colors;
     await match.save();
+
+    // Add the owner to the match on the websocket server
+    try {
+        Wss.clients.forEach((client) => {
+            if (client._id === username) {
+                client.matchCode = match.code;
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+
     ctx.body = match;
 }
 
@@ -112,6 +147,7 @@ async function getRating(ctx, next) {
 
 module.exports = {
     findAll,
+    getColors,
     addMatch,
     addRating,
     getRating,

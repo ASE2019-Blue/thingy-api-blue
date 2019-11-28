@@ -18,10 +18,10 @@ const MatchSchema = new mongoose.Schema({
         required: true,
     },
     players: [{
-          name: { type: String },
-          color: {type: String },
-          score: {type: String }
-        },
+        name: { type: String },
+        color: { type: String },
+        score: { type: String },
+    },
         // ref: 'User',
         // required: true,
     ],
@@ -40,6 +40,10 @@ const MatchSchema = new mongoose.Schema({
         ref: 'Thingy',
         required: true,
     }],
+    colors: {
+        type: Object,
+        required: true,
+    },
     owner: {
         type: String,
         ref: 'User',
