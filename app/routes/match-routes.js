@@ -1,9 +1,14 @@
 const Router = require('koa-router');
+
 const router = new Router();
 
 const Ctrl = require('../controllers/match-controller');
 
 router.get('/', Ctrl.findAll)
-    .patch('/:matchId/start', Ctrl.startMatch);
+    .get('/:matchId', Ctrl.find)
+    .post('/invitations/:code', Ctrl.subscribe)
+    .del('/invitations/:code', Ctrl.unsubscribe)
+    .put('/:matchId/state', Ctrl.changeStatus)
+    .put('/:matchId/players', Ctrl.updatePlayers);
 
 module.exports = router.routes();

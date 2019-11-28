@@ -8,33 +8,49 @@ const STATE_FINISHED = 'finished';
 const MATCH_STATES = [STATE_CREATED, STATE_RUNNING, STATE_FINISHED];
 
 const MatchSchema = new mongoose.Schema({
-        gameKey: {
-            type: String,
-            required: true,
-            enum: Game.GAME_KEYS
+    gameKey: {
+        type: String,
+        required: true,
+        enum: Game.GAME_KEYS,
+    },
+    config: {
+        type: Object,
+        required: true,
+    },
+    players: [{
+          name: { type: String },
+          color: {type: String },
+          score: {type: String }
         },
-        config: {
-            type: Object,
-            required: true,
-        },
-        state: {
-            type: String,
-            required: true,
-            enum: MATCH_STATES,
-            default: STATE_CREATED
-        },
-        thingys: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Thingy',
-            required: true
-        }],
-        owner: {
-            type: String,
-            ref: 'User',
-            required: true
-        },
-    }, {
-        timestamps: true
+        // ref: 'User',
+        // required: true,
+    ],
+    code: {
+        type: String,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+        enum: MATCH_STATES,
+        default: STATE_CREATED,
+    },
+    thingys: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Thingy',
+        required: true,
+    }],
+    owner: {
+        type: String,
+        ref: 'User',
+        required: true,
+    },
+}, {
+    timestamps: true,
 });
 
-module.exports = mongoose.model('Match', MatchSchema);
+const MODEL = mongoose.model('Match', MatchSchema);
+
+module.exports = {
+    MODEL, MATCH_STATES, STATE_CREATED, STATE_RUNNING, STATE_FINISHED,
+};

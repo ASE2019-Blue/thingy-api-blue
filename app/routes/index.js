@@ -1,10 +1,18 @@
+const authRoutes = require('./auth-routes');
+const gameRoutes = require('./game-routes');
+const thingyRoutes = require('./thingy-routes');
+const userRoutes = require('./user-routes');
+const matchRoutes = require('./match-routes');
+const demoRoutes = require('./demo-routes');
+const signupRoutes = require('./signup-routes');
+
 module.exports = (router) => {
     router.redirect('/', '/games');
-    router.use('/auth', require('./auth-routes'));
-    router.use('/games', require('./game-routes'));
-    router.use('/sign-up', require('./signup-routes'));
-    router.use('/thingys', require('./thingy-routes'));
-    router.use('/users', require('./user-routes'));
-    router.use('/matches', require('./match-routes'));
-    router.use('/demo', require('./demo-routes'));
+    router.use('/auth', authRoutes);
+    router.use('/demo', demoRoutes);
+    router.use('/games', gameRoutes);
+    router.use('/matches', matchRoutes);
+    router.use('/sign-up', signupRoutes);
+    router.use('/thingys', thingyRoutes);
+    router.use('/users', userRoutes);
 };
