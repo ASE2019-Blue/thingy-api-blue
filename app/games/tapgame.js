@@ -145,7 +145,7 @@ async function stop(match) {
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: {$in: [Match.STATE_CREATED, Match.STATE_RUNNING]}}, { state: Match.STATE_FINISHED });
+    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } }, { state: Match.STATE_FINISHED });
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, configThingy.colors.favorite);

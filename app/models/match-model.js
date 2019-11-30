@@ -18,10 +18,10 @@ const MatchSchema = new mongoose.Schema({
         required: true,
     },
     players: [{
-          name: { type: String },
-          color: {type: String },
-          score: {type: String }
-        },
+        name: { type: String },
+        color: { type: String },
+        score: { type: String },
+    },
         // ref: 'User',
         // required: true,
     ],

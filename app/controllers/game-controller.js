@@ -31,10 +31,10 @@ async function findAll(ctx, next) {
     // TODO Remove after development
     await Utilities.sleep(800);
     const games = Game.GAMES;
-    for (let i = 0 ; i < games.length; i++) {
+    for (let i = 0; i < games.length; i++) {
         const average = await calculateRating(games[i].key);
         // if(average !== NaN)
-        games[i]['rating'] = average;
+        games[i].rating = average;
     }
     ctx.body = games;
 }
@@ -72,7 +72,7 @@ async function addMatch(ctx, next) {
     match.thingys = matchDto.thingys;
     const user = await User.findOne({ username });
     match.players = matchDto.config.players;
-    match.players.push({ name : user.username, color: "255,0,0", score: "0" });
+    match.players.push({ name: user.username, color: '255,0,0', score: '0' });
     match.code = CodeGenerator.makeCode(5);
 
     await match.save();
