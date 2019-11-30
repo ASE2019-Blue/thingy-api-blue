@@ -1,5 +1,6 @@
 const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
+const HighScore = require('../models/highscore-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
 const websocket = require('../websocket');
@@ -149,6 +150,23 @@ async function stop(match) {
         { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
         { state: Match.STATE_FINISHED },
     );
+
+    const highScoreRecords = [];
+    match.players.forEach((player) => {
+        // Store highscore only for players with user account
+        if (player.user === null || player.user === undefined) {
+            return;
+        }
+
+        const highScoreRecord = new HighScore();
+        highScoreRecord.gameKey = match.gameKey;
+        highScoreRecord.match = match;
+        highScoreRecord.user = player.user;
+        highScoreRecord.score = parseInt(player.score, 10);
+        highScoreRecords.push(highScoreRecord);
+    });
+    await HighScore.insertMany(highScoreRecords);
+
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, configThingy.colors.favorite);

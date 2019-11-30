@@ -76,6 +76,8 @@ async function changeStatus(ctx, next) {
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
     if (match === null) ctx.throw(404, { error: 'Match not found' });
+    if (match.state === Match.STATE_FINISHED) ctx.throw(404, { error: 'Cannot change state of a finished match' });
+    if (match.state === Match.STATE_CANCELED) ctx.throw(404, { error: 'Cannot change state of a canceled match' });
 
     const { gameKey } = match;
 
@@ -122,7 +124,13 @@ async function subscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    match.players.push({ name: user.username, color: '125, 125, 0', score: '0' });// todo check disponibolity of the colors
+    // todo check disponsibility of the colors
+    match.players.push({
+        name: user.username,
+        user: user.username,
+        color: '125, 125, 0',
+        score: 0,
+    });
     match.save();
     ctx.body = match; // returns a match
     ctx.status = 200;
