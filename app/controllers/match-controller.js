@@ -112,7 +112,7 @@ async function subscribe(ctx, next) {
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
-    if (match.players.findIndex((p) => p.name == user.username) != -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
+    if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
     match.players.push({ name: user.username, color: '125, 125, 0', score: '0' });// todo check disponibolity of the colors
     match.save();
@@ -128,7 +128,7 @@ async function unsubscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
-    if (playerIndex == -1) { ctx.throw(400, { error: 'Player not found!' }); }
+    if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
 
     match.players.splice(playerIndex, 1);
     match.save();
