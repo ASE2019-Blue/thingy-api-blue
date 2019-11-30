@@ -72,18 +72,20 @@ async function changeStatus(ctx, next) {
     const { matchId } = ctx.params;
     const { state } = ctx.request.body;
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
-    if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
+    if (state === Match.STATE_CREATED) ctx.throw(400, 'Cannot change to created state');
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
-    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
+    if (match === null) ctx.throw(404, { error: 'Match not found' });
+
     const { gameKey } = match;
+
     try {
         switch (state) {
         case Match.STATE_RUNNING:
             // For each game add a test on gameKey and launch the corresponding one
             // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
-                Tapgame.start(match);
+                await Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.start(match)
             }
@@ -92,10 +94,16 @@ async function changeStatus(ctx, next) {
             // For each game add a test on gameKey and launch the corresponding one
             // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
-                Tapgame.stop(match);
+                await Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.stop(match)
             }
+            break;
+        case Match.STATE_CANCELED:
+            await Match.MODEL.findOneAndUpdate(
+                { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+                { state: Match.STATE_CANCELED },
+            );
             break;
         default:
         }
