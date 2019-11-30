@@ -18,8 +18,17 @@ async function findBest(ctx, next) {
     // await highScore.save();
 
     const highScores = {};
-    highScores[Game.TAP_GAME] = await HighScore.find({ gameKey: Game.TAP_GAME }).sort({ score: -1 }).limit(5);
-    highScores[Game.HIDE_AND_SEEK] = await HighScore.find({ gameKey: Game.HIDE_AND_SEEK }).sort({ score: -1 }).limit(5);
+
+    highScores[Game.TAP_GAME] = {
+        name: Game.TAP_GAME_TITLE,
+        gameKey: Game.TAP_GAME,
+        highScores: await HighScore.find({ gameKey: Game.TAP_GAME }).sort({ score: -1 }).limit(5),
+    };
+    highScores[Game.HIDE_AND_SEEK] = {
+        name: Game.HIDE_AND_SEEK_TITLE,
+        gameKey: Game.HIDE_AND_SEEK,
+        highScores: await HighScore.find({ gameKey: Game.HIDE_AND_SEEK }).sort({ score: -1 }).limit(5),
+    };
 
     ctx.body = highScores;
 }

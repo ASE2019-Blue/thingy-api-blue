@@ -145,9 +145,16 @@ paths:
                 type: object
                 properties:
                   gameKey:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Highscore'
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      gameKey:
+                        type: string
+                      highScores:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Highscore'
     post:
       summary: Sets a rating for the actual player for that game
       tags: ['Games']
