@@ -1,5 +1,5 @@
 const WebSocket = require('ws');
-const Jwt = require('koa-jwt');
+const Jwt = require('jsonwebtoken');
 
 const wsOptions = {
     port: process.env.WEBSOCKET_PORT || 3001,
