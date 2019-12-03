@@ -86,6 +86,7 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.TAP_GAME) {
                 // send cancelled message to everyone in the match
                 Wss.cancelBroadcast(code);
+                await Match.MODEL.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED }, { state: Match.STATE_CANCELLED });
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek
             }
