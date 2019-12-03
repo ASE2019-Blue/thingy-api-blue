@@ -81,6 +81,15 @@ async function changeStatus(ctx, next) {
     const { code } = match;
     try {
         switch (state) {
+        case Match.STATE_CANCELLED:
+            // For each game add a test on gameKey and launch the corresponding one
+            if (gameKey === Game.TAP_GAME) {
+                // send cancelled message to everyone in the match
+                Wss.cancelBroadcast(code);
+            } else if (gameKey === Game.HIDE_AND_SEEK) {
+                // Hideandseek
+            }
+            break;
         case Match.STATE_RUNNING:
             // For each game add a test on gameKey and launch the corresponding one
             if (gameKey === Game.TAP_GAME) {

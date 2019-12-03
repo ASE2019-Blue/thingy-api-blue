@@ -14,6 +14,9 @@ WEBSOCKET MESSAGES TO THE CLIENT :
 - Stop a match :
 	Expected reply : {"msg":"stop"}
 
+- Cancel a match :
+	Expected reply : {"msg":"cancelled"}
+
 DURING TAP-GAME :
 - Message with the points of the current player is sent to every player in that match
 	example : {"msg" : "points", "player": "Loic", "points" : "2945" }

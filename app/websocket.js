@@ -28,7 +28,6 @@ const wss = new WebSocket.Server(wsOptions);
 wss.on('connection', (ws, req) => {
     const { username } = req.user;
     ws._id = username;
-    ws.send(`Welcome ${ws._id}`);
 });
 
 
@@ -93,15 +92,35 @@ function startBroadcast(code) {
 
 /**
  * Broadcast a stop match message to every client in that match.
- *
+ * Remove the client from the match.
  * @param code
  */
 function stopBroadcast(code) {
     try {
-        const startMsg = { msg: 'stop' };
+        const stopMsg = { msg: 'stop' };
         wss.clients.forEach((client) => {
             if (client.matchCode === code) {
-                client.send(JSON.stringify(startMsg));
+                client.send(JSON.stringify(stopMsg));
+                client.matchCode = 0;
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+/**
+ * Broadcast a cancelled match message to every client in that match.
+ * Remove the client from the match.
+ * @param code
+ */
+function cancelBroadcast(code) {
+    try {
+        const cancelMsg = { msg: 'cancel' };
+        wss.clients.forEach((client) => {
+            if (client.matchCode === code) {
+                client.send(JSON.stringify(cancelMsg));
+                client.matchCode = 0;
             }
         });
     } catch (err) {
@@ -157,6 +176,7 @@ module.exports = {
     addPlayerToMatch,
     startBroadcast,
     stopBroadcast,
+    cancelBroadcast,
     removePlayerFromMatch,
     tapGamePointsNotification,
 };
