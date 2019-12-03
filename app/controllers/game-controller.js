@@ -101,15 +101,7 @@ async function addMatch(ctx, next) {
     await match.save();
 
     // Add the owner to the match on the websocket server
-    try {
-        Wss.clients.forEach((client) => {
-            if (client._id === username) {
-                client.matchCode = match.code;
-            }
-        });
-    } catch (err) {
-        console.log(err);
-    }
+    Wss.addOwnerToMatch(username, match.code);
 
     ctx.body = match;
 }

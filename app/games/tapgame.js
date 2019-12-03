@@ -39,7 +39,6 @@ async function start(match) {
 
     const { client } = mqtt;
 
-    // For development purpose only: hardcoded MAC
     const thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
@@ -107,17 +106,9 @@ async function start(match) {
                 }
             });
             await Match.MODEL.findOneAndUpdate({ _id: match._id }, { players: match.players });
-            try {
-                // websocket: notification to clients connected to the match with actual points of the player
-                const msg = { msg: 'points', player: playerName, points: pointsPlayer.get(playerName) };
-                Wss.clients.forEach((user) => {
-                    if (user.matchCode === match.code) {
-                        user.send(JSON.stringify(msg));
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-            }
+
+            // Notify the points to the clients
+            Wss.tapGamePointsNotification(playerName, pointsPlayer.get(playerName), match.code);
 
             // END
             if (randomColors.length === 0) {

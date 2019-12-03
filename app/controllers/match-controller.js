@@ -83,19 +83,9 @@ async function changeStatus(ctx, next) {
         switch (state) {
         case Match.STATE_RUNNING:
             // For each game add a test on gameKey and launch the corresponding one
-            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
                 // send start message to everyone in the match
-                try {
-                    const startMsg = { msg: 'start' };
-                    Wss.clients.forEach((client) => {
-                        if (client.matchCode === code) {
-                            client.send(JSON.stringify(startMsg));
-                        }
-                    });
-                } catch (err) {
-                    console.log(err);
-                }
+                Wss.startBroadcast(code);
                 Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.start(match)
@@ -103,19 +93,9 @@ async function changeStatus(ctx, next) {
             break;
         case Match.STATE_FINISHED:
             // For each game add a test on gameKey and launch the corresponding one
-            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
                 // send stop message to everyone in the match
-                try {
-                    const stopMsg = { msg: 'stop' };
-                    Wss.clients.forEach((client) => {
-                        if (client.matchCode === code) {
-                            client.send(JSON.stringify(stopMsg));
-                        }
-                    });
-                } catch (err) {
-                    console.log(err);
-                }
+                Wss.stopBroadcast(code);
                 Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.stop(match)
@@ -143,19 +123,7 @@ async function subscribe(ctx, next) {
     match.colors = colors;
 
     // send join message to everyone in the match and move the joining player to the match on the websocket server
-    try {
-        const joinMsg = { msg: 'join', player: user.username, color: choosenColor };
-        Wss.clients.forEach((client) => {
-            if (client._id === user.username) {
-                client.matchCode = code;
-            }
-            if (client.matchCode === code) {
-                client.send(JSON.stringify(joinMsg));
-            }
-        });
-    } catch (err) {
-        console.log(err);
-    }
+    Wss.addPlayerToMatch(user.username, code, choosenColor);
 
     match.players.push({ name: user.username, color: choosenColor, score: '0' });
     match.save();
@@ -171,19 +139,7 @@ async function unsubscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
     // send quit message to everyone in the match and remove the joining player from the match on the websocket server
-    try {
-        const quitMsg = { msg: 'quit', player: user.username };
-        Wss.clients.forEach((client) => {
-            if (client._id === user.username) {
-                client.matchCode = 0;
-            }
-            if (client.matchCode === code) {
-                client.send(JSON.stringify(quitMsg));
-            }
-        });
-    } catch (err) {
-        console.log(err);
-    }
+    Wss.removePlayerFromMatch(user.username, code);
 
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
     if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
