@@ -143,7 +143,7 @@ async function unsubscribe(ctx, next) {
 
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
     if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
-    const colorAvailableAgain = match.player[playerIndex].color;
+    const colorAvailableAgain = match.players[playerIndex].color;
     match.colors.push(colorAvailableAgain);
     match.players.splice(playerIndex, 1);
     match.save();
