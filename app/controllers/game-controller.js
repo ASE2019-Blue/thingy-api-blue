@@ -53,8 +53,6 @@ async function getColors(ctx, next) {
     // TODO Remove after development
     await Utilities.sleep(800);
     const { colors } = ConfigThingy;
-    delete colors.favorite;
-    delete colors.none;
     const colorsArray = Object.values(colors);
     ctx.body = colorsArray;
 }

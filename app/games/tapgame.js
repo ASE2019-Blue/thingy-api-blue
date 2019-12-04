@@ -80,7 +80,7 @@ async function start(match) {
 
 
     // -----------------GAME START HERE----------------------
-    client.publish(ledPublish, configThingy.colors.none);
+    client.publish(ledPublish, configThingy.systemColors.none);
     // Wait 5 seconds to let people get ready
     await Utilities.sleep(5000);
 
@@ -116,10 +116,10 @@ async function start(match) {
                 console.log(pointsPlayer);
                 // change state of the match
                 await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
-                client.publish(ledPublish, configThingy.colors.favorite);
+                client.publish(ledPublish, configThingy.systemColors.idle);
                 // -----------------GAME ENDS HERE----------------------
             } else {
-                client.publish(ledPublish, configThingy.colors.none);
+                client.publish(ledPublish, configThingy.systemColors.none);
                 await Utilities.sleep(2000);
                 // when the color is randomly selected, remove it from the array
                 choosenColor = randomColors.pop();
@@ -150,7 +150,7 @@ async function stop(match) {
     );
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
-    client.publish(ledPublish, configThingy.colors.favorite);
+    client.publish(ledPublish, configThingy.systemColors.idle);
 }
 
 module.exports = {
