@@ -20,6 +20,3 @@ WEBSOCKET MESSAGES TO THE CLIENT :
 DURING TAP-GAME :
 - Message with the points of the current player is sent to every player in that match
 	example : {"msg" : "points", "player": "Loic", "points" : "2945" }
-
-- The match ended
-	Expected reply : {"msg":"end"}
