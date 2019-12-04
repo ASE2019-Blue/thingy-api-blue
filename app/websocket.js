@@ -171,6 +171,24 @@ function tapGamePointsNotification(playerName, points, code) {
     }
 }
 
+/**
+ * Notify the end of the game to all clients in that match.
+ *
+ * @param code
+ */
+function gameEndNotification(code) {
+    try {
+        const msg = { msg: 'end' };
+        wss.clients.forEach((user) => {
+            if (user.matchCode === code) {
+                user.send(JSON.stringify(msg));
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 module.exports = {
     addOwnerToMatch,
     addPlayerToMatch,
@@ -179,4 +197,5 @@ module.exports = {
     cancelBroadcast,
     removePlayerFromMatch,
     tapGamePointsNotification,
+    gameEndNotification,
 };

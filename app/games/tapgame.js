@@ -116,6 +116,7 @@ async function start(match) {
                 console.log(pointsPlayer);
                 // change state of the match
                 await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
+                Wss.gameEndNotification(match.code);
                 client.publish(ledPublish, configThingy.systemColors.idle);
                 // -----------------GAME ENDS HERE----------------------
             } else {
