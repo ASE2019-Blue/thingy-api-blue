@@ -73,12 +73,16 @@ async function changeStatus(ctx, next) {
     const { matchId } = ctx.params;
     const { state } = ctx.request.body;
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
-    if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
+    if (state === Match.STATE_CREATED) ctx.throw(400, 'Cannot change to created state');
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
-    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
+    if (match === null) ctx.throw(404, { error: 'Match not found' });
+    if (match.state === Match.STATE_FINISHED) ctx.throw(404, { error: 'Cannot change state of a finished match' });
+    if (match.state === Match.STATE_CANCELED) ctx.throw(404, { error: 'Cannot change state of a canceled match' });
+
     const { gameKey } = match;
     const { code } = match;
+
     try {
         switch (state) {
         case Match.STATE_CANCELLED:
@@ -96,7 +100,7 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.TAP_GAME) {
                 // send start message to everyone in the match
                 Wss.startBroadcast(code);
-                Tapgame.start(match);
+                await Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.start(match)
             }
@@ -106,10 +110,16 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.TAP_GAME) {
                 // send stop message to everyone in the match
                 Wss.stopBroadcast(code);
-                Tapgame.stop(match);
+                await Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.stop(match)
             }
+            break;
+        case Match.STATE_CANCELED:
+            await Match.MODEL.findOneAndUpdate(
+                { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+                { state: Match.STATE_CANCELED },
+            );
             break;
         default:
         }
@@ -135,7 +145,12 @@ async function subscribe(ctx, next) {
     // send join message to everyone in the match and move the joining player to the match on the websocket server
     Wss.addPlayerToMatch(user.username, code, choosenColor);
 
-    match.players.push({ name: user.username, color: choosenColor, score: '0' });
+    match.players.push({
+        name: user.username,
+        user: user.username,
+        color: choosenColor,
+        score: 0,
+    });
     match.save();
     ctx.body = match; // returns a match
     ctx.status = 200;

@@ -1,5 +1,6 @@
 const authRoutes = require('./auth-routes');
 const gameRoutes = require('./game-routes');
+const highscoreRoutes = require('./highscore-routes');
 const thingyRoutes = require('./thingy-routes');
 const userRoutes = require('./user-routes');
 const matchRoutes = require('./match-routes');
@@ -11,6 +12,7 @@ module.exports = (router) => {
     router.use('/auth', authRoutes);
     router.use('/demo', demoRoutes);
     router.use('/games', gameRoutes);
+    router.use('/highscores', highscoreRoutes);
     router.use('/matches', matchRoutes);
     router.use('/sign-up', signupRoutes);
     router.use('/thingys', thingyRoutes);

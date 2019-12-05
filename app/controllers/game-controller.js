@@ -1,7 +1,7 @@
 const Game = require('../models/game-model');
 const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
-// const User = require('../models/user-model');
+const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
 const ConfigThingy = require('../config-thingy');
@@ -34,7 +34,7 @@ async function findAll(ctx, next) {
     await Utilities.sleep(800);
     const games = Game.GAMES;
     for (let i = 0; i < games.length; i++) {
-        const average = calculateRating(games[i].key);
+        const average = await calculateRating(games[i].key);
         // if(average !== NaN)
         games[i].rating = average;
     }
@@ -92,8 +92,14 @@ async function addMatch(ctx, next) {
     match.owner = username;
     match.config = { numberOfRounds: matchDto.config.numberOfRounds };
     match.thingys = matchDto.thingys;
-    // const user = await User.findOne({ username });
+    const user = await User.findOne({ username });
     match.players = matchDto.config.players;
+    match.players.push({
+        name: user.username,
+        user: user.username,
+        color: '255,0,0',
+        score: 0,
+    });
     match.code = CodeGenerator.makeCode(5);
     match.colors = matchDto.colors;
     await match.save();

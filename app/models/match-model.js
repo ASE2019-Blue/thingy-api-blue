@@ -20,6 +20,7 @@ const MatchSchema = new mongoose.Schema({
     },
     players: [{
         name: { type: String },
+        user: { type: String, ref: 'User' },
         color: { type: String },
         score: { type: String },
     },
