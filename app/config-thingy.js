@@ -10,16 +10,16 @@ const config = {
 };
 
 const systemColors = {
-    idle: '1,5,2,0',
-    none: '1,0,0,0',
+    idle: '5,2,0',
+    none: '0,0,0',
 }
 
 const colors = {
-    red: '1,255,0,0',
-    blue: '1,0,0,255',
-    green: '1,0,255,0',
-    purple: '1,255,0,125',
-    yellow: '1,255,125,0',
+    red: '255,0,0',
+    blue: '0,0,255',
+    green: '0,255,0',
+    purple: '255,0,125',
+    yellow: '255,125,0',
 };
 
 module.exports = {
