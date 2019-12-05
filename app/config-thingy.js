@@ -9,9 +9,12 @@ const config = {
     },
 };
 
-const colors = {
-    favorite: '1,5,2,0',
+const systemColors = {
+    idle: '1,5,2,0',
     none: '1,0,0,0',
+}
+
+const colors = {
     red: '1,255,0,0',
     blue: '1,0,0,255',
     green: '1,0,255,0',
@@ -22,4 +25,5 @@ const colors = {
 module.exports = {
     config,
     colors,
+    systemColors,
 };

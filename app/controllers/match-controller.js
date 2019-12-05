@@ -3,6 +3,7 @@ const Match = require('../models/match-model');
 const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const Tapgame = require('../games/tapgame');
+const Wss = require('../websocket');
 
 const MATCH_FIELDS_WITHOUT_THINGY = '-_thingys';
 
@@ -80,13 +81,25 @@ async function changeStatus(ctx, next) {
     if (match.state === Match.STATE_CANCELED) ctx.throw(404, { error: 'Cannot change state of a canceled match' });
 
     const { gameKey } = match;
+    const { code } = match;
 
     try {
         switch (state) {
+        case Match.STATE_CANCELLED:
+            // For each game add a test on gameKey and launch the corresponding one
+            if (gameKey === Game.TAP_GAME) {
+                // send cancelled message to everyone in the match
+                Wss.cancelBroadcast(code);
+                await Match.MODEL.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED }, { state: Match.STATE_CANCELLED });
+            } else if (gameKey === Game.HIDE_AND_SEEK) {
+                // Hideandseek
+            }
+            break;
         case Match.STATE_RUNNING:
             // For each game add a test on gameKey and launch the corresponding one
-            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
+                // send start message to everyone in the match
+                Wss.startBroadcast(code);
                 await Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.start(match)
@@ -94,8 +107,9 @@ async function changeStatus(ctx, next) {
             break;
         case Match.STATE_FINISHED:
             // For each game add a test on gameKey and launch the corresponding one
-            // Maybe here, we could make a promise and wait for the game to end and recolt results here and send it back to the user
             if (gameKey === Game.TAP_GAME) {
+                // send stop message to everyone in the match
+                Wss.stopBroadcast(code);
                 await Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek.stop(match)
@@ -116,7 +130,6 @@ async function changeStatus(ctx, next) {
 }
 
 async function subscribe(ctx, next) {
-    // push to the websocket ?
     const { code } = ctx.params;
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
@@ -124,11 +137,18 @@ async function subscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    // todo check disponsibility of the colors
+    // select an available color and remove it from the array of colors still available
+    const { colors } = match;
+    const choosenColor = colors.pop();
+    match.colors = colors;
+
+    // send join message to everyone in the match and move the joining player to the match on the websocket server
+    Wss.addPlayerToMatch(user.username, code, choosenColor);
+
     match.players.push({
         name: user.username,
         user: user.username,
-        color: '125, 125, 0',
+        color: choosenColor,
         score: 0,
     });
     match.save();
@@ -143,9 +163,13 @@ async function unsubscribe(ctx, next) {
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
 
+    // send quit message to everyone in the match and remove the joining player from the match on the websocket server
+    Wss.removePlayerFromMatch(user.username, code);
+
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
     if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
-
+    const colorAvailableAgain = match.players[playerIndex].color;
+    match.colors.push(colorAvailableAgain);
     match.players.splice(playerIndex, 1);
     match.save();
     ctx.status = 200;

@@ -129,7 +129,7 @@ async function changeFavoriteThingy(ctx, next) {
         user.favoriteThingy = null;
     } else {
         const thingyObj = await Thingy.findById(thingy);
-        if (thingyObj == null) ctx.throw(404, 'Thingy not found');
+        if (thingyObj === null) ctx.throw(404, 'Thingy not found');
         user.favoriteThingy = thingy;
     }
     await user.save();
