@@ -3,6 +3,7 @@ const Match = require('../models/match-model');
 const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const Tapgame = require('../games/tapgame');
+const Hideandseek = require('../games/hide-and-seek');
 const Wss = require('../websocket');
 
 const MATCH_FIELDS_WITHOUT_THINGY = '-_thingys';
@@ -73,53 +74,45 @@ async function changeStatus(ctx, next) {
     const { matchId } = ctx.params;
     const { state } = ctx.request.body;
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
-    if (state === Match.STATE_CREATED) ctx.throw(400, 'Cannot change to created state');
+    if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
-    if (match === null) ctx.throw(404, { error: 'Match not found' });
-    if (match.state === Match.STATE_FINISHED) ctx.throw(404, { error: 'Cannot change state of a finished match' });
-    if (match.state === Match.STATE_CANCELED) ctx.throw(404, { error: 'Cannot change state of a canceled match' });
-
+    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
     const { gameKey } = match;
     const { code } = match;
-
     try {
         switch (state) {
         case Match.STATE_CANCELLED:
+            // send cancelled message to everyone in the match
+            Wss.cancelBroadcast(code);
             // For each game add a test on gameKey and launch the corresponding one
             if (gameKey === Game.TAP_GAME) {
-                // send cancelled message to everyone in the match
-                Wss.cancelBroadcast(code);
                 await Match.MODEL.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED }, { state: Match.STATE_CANCELLED });
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek
             }
             break;
         case Match.STATE_RUNNING:
+            if (gameKey === Game.HIDE_AND_SEEK)
+                await Hideandseek.createTeams(match);
+            // send start message to everyone in the match
+            Wss.startBroadcast(code);
             // For each game add a test on gameKey and launch the corresponding one
             if (gameKey === Game.TAP_GAME) {
-                // send start message to everyone in the match
-                Wss.startBroadcast(code);
-                await Tapgame.start(match);
+                Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
-                // Hideandseek.start(match)
+                Hideandseek.start(match)
             }
             break;
         case Match.STATE_FINISHED:
+            // send stop message to everyone in the match
+            Wss.stopBroadcast(code);
             // For each game add a test on gameKey and launch the corresponding one
             if (gameKey === Game.TAP_GAME) {
-                // send stop message to everyone in the match
-                Wss.stopBroadcast(code);
-                await Tapgame.stop(match);
+                Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
-                // Hideandseek.stop(match)
+                Hideandseek.stop(match)
             }
-            break;
-        case Match.STATE_CANCELED:
-            await Match.MODEL.findOneAndUpdate(
-                { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
-                { state: Match.STATE_CANCELED },
-            );
             break;
         default:
         }
@@ -145,12 +138,7 @@ async function subscribe(ctx, next) {
     // send join message to everyone in the match and move the joining player to the match on the websocket server
     Wss.addPlayerToMatch(user.username, code, choosenColor);
 
-    match.players.push({
-        name: user.username,
-        user: user.username,
-        color: choosenColor,
-        score: 0,
-    });
+    match.players.push({ name: user.username, color: choosenColor, score: '0' });
     match.save();
     ctx.body = match; // returns a match
     ctx.status = 200;
