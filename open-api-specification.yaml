@@ -155,20 +155,7 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Highscore'
-    post:
-      summary: Sets a rating for the actual player for that game
-      tags: ['Games']
-      parameters:
-        - name: gameKey
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Successful opeation
-        404:
-          description: Game not found
+
   /matches:
     get:
       summary: Get list of matches
@@ -431,6 +418,37 @@ paths:
           description: Invalid request
         404:
           description: User not found
+
+  /users/{username}/highscores:
+    get:
+      summary: Get the best results of a user for every game
+      tags: ['Highscores']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gameKey:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      gameKey:
+                        type: string
+                      highScores:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Highscore'
 
   /users/{username}/password:
     put:
