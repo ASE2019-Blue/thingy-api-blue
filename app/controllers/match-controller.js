@@ -94,7 +94,7 @@ async function changeStatus(ctx, next) {
             break;
         case Match.STATE_RUNNING:
             if (gameKey === Game.HIDE_AND_SEEK) {
-                //TODO: remove (only for debug)
+                // TODO: remove (only for debug)
                 // await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
                 await Hideandseek.createTeams(match);
             }
@@ -104,7 +104,7 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.TAP_GAME) {
                 Tapgame.start(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
-                Hideandseek.start(match)
+                Hideandseek.start(match);
             }
             break;
         case Match.STATE_FINISHED:
@@ -114,7 +114,7 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.TAP_GAME) {
                 Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
-                Hideandseek.stop(match)
+                Hideandseek.stop(match);
             }
             break;
         default:
@@ -133,18 +133,18 @@ async function subscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    if(match.gameKey === Game.TAP_GAME) {
+    if (match.gameKey === Game.TAP_GAME) {
         // select an available color and remove it from the array of colors still available
         const { colors } = match;
         const choosenColor = colors.pop();
         match.colors = colors;
-        
+
         // send join message to everyone in the match and move the joining player to the match on the websocket server
-        Wss.addPlayerToMatch(user.username, code, choosenColor);
-    
+        Wss.addPlayerToTGMatch(user.username, code, choosenColor);
+
         match.players.push({ name: user.username, color: choosenColor, score: '0' });
-    } else if(match.gameKey === Game.HIDE_AND_SEEK) {
-        Wss.addPlayerToMatch(user.username, code);
+    } else if (match.gameKey === Game.HIDE_AND_SEEK) {
+        Wss.addPlayerToHASMatch(user.username, code);
         match.players.push({ name: user.username, score: '0' });
     }
 
@@ -165,7 +165,7 @@ async function unsubscribe(ctx, next) {
 
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
     if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
-    if(match.gameKey === Game.TAP_GAME) {
+    if (match.gameKey === Game.TAP_GAME) {
         const colorAvailableAgain = match.players[playerIndex].color;
         match.colors.push(colorAvailableAgain);
     }
@@ -177,12 +177,12 @@ async function unsubscribe(ctx, next) {
 async function changeHiderStatus(ctx, next) {
     const { code } = ctx.params;
     const { catched } = ctx.request.body;
-    
+
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
     if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
-    
-    match.config['catched'] = catched;
+
+    match.config.catched = catched;
     match.markModified('config'); // so that save recognizes the inner change
     await match.save();
 }
@@ -190,13 +190,13 @@ async function changeHiderStatus(ctx, next) {
 async function changeHiderLocation(ctx, next) {
     const { code } = ctx.params;
     const { latitude, longitude, requestId } = ctx.request.body;
-    
+
     const match = await Match.MODEL.findOne({ code });
     if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
     if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
-    
-    if(Hideandseek.isValidLocationRequestResponse(code, requestId)){
-        Wss.hideAndSeekUpdateLocation(code,latitude,longitude);
+
+    if (Hideandseek.isValidLocationRequestResponse(code, requestId)) {
+        Wss.hideAndSeekUpdateLocation(code, latitude, longitude);
         ctx.status = 200;
     } else {
         ctx.throw(208, { error: 'Request already processed' });
@@ -211,5 +211,5 @@ module.exports = {
     subscribe,
     unsubscribe,
     changeHiderStatus,
-    changeHiderLocation
+    changeHiderLocation,
 };

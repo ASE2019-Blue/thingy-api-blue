@@ -45,7 +45,7 @@ const MatchSchema = new mongoose.Schema({
     colors: {
         type: Object,
         // only required for tap game
-        //required: true,
+        // required: true,
     },
     owner: {
         type: String,

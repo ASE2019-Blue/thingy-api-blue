@@ -1,7 +1,6 @@
 const Game = require('../models/game-model');
 const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
-const User = require('../models/user-model');
 const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
 const ConfigThingy = require('../config-thingy');
@@ -35,7 +34,6 @@ async function findAll(ctx, next) {
     const games = Game.GAMES;
     for (let i = 0; i < games.length; i++) {
         const average = await calculateRating(games[i].key);
-        // if(average !== NaN)
         games[i].rating = average;
     }
     ctx.body = games;
@@ -82,7 +80,7 @@ async function addMatch(ctx, next) {
         ctx.throw(400, { error: 'You need to provide a list of thingys to use for the match' });
     }
 
-    if(gameKey === Game.TAP_GAME) {
+    if (gameKey === Game.TAP_GAME) {
         if (typeof matchDto.colors === 'undefined') {
             ctx.throw(400, { error: 'You need to provide a table with the colors available and not available anymore.' });
         }
@@ -92,9 +90,9 @@ async function addMatch(ctx, next) {
     const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
-    if(gameKey === Game.TAP_GAME) {
+    if (gameKey === Game.TAP_GAME) {
         match.config = { numberOfRounds: matchDto.config.numberOfRounds };
-    } else if(gameKey === Game.HIDE_AND_SEEK){
+    } else if (gameKey === Game.HIDE_AND_SEEK) {
         match.config = { gameTime: matchDto.config.gameTime };
     }
     match.thingys = matchDto.thingys;
@@ -107,7 +105,7 @@ async function addMatch(ctx, next) {
     //     score: 0,
     // });
     match.code = CodeGenerator.makeCode(5);
-    if(gameKey === Game.TAP_GAME) {
+    if (gameKey === Game.TAP_GAME) {
         match.colors = matchDto.colors;
     }
     await match.save();

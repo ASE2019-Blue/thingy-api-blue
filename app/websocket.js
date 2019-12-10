@@ -56,7 +56,7 @@ function addOwnerToMatch(username, code) {
  * @param code
  * @param color
  */
-function addPlayerToMatch(username, code, color) {
+function addPlayerToTGMatch(username, code, color) {
     try {
         const joinMsg = { msg: 'join', player: username, color };
         wss.clients.forEach((client) => {
@@ -78,7 +78,7 @@ function addPlayerToMatch(username, code, color) {
  * @param username
  * @param code
  */
-function addPlayerToMatch(username, code) {
+function addPlayerToHASMatch(username, code) {
     try {
         const joinMsg = { msg: 'join', player: username };
         wss.clients.forEach((client) => {
@@ -195,7 +195,7 @@ function tapGamePointsNotification(playerName, points, code) {
 
 function hideAndSeekStartTimer(code, duration) {
     try {
-        const msg = { msg: 'startTimer' , duration: duration};
+        const msg = { msg: 'startTimer', duration };
         wss.clients.forEach((user) => {
             if (user.matchCode === code) {
                 user.send(JSON.stringify(msg));
@@ -208,7 +208,7 @@ function hideAndSeekStartTimer(code, duration) {
 
 function hideAndSeekRequestLocation(code, requestId) {
     try {
-        const msg = { msg: 'requestLocation' , requestId: requestId};
+        const msg = { msg: 'requestLocation', requestId };
         wss.clients.forEach((user) => {
             if (user.matchCode === code) {
                 user.send(JSON.stringify(msg));
@@ -221,7 +221,7 @@ function hideAndSeekRequestLocation(code, requestId) {
 
 function hideAndSeekUpdateLocation(code, latitude, longitude) {
     try {
-        const msg = { msg: 'location', latitude: latitude, longitude: longitude};
+        const msg = { msg: 'location', latitude, longitude };
         wss.clients.forEach((user) => {
             if (user.matchCode === code) {
                 user.send(JSON.stringify(msg));
@@ -234,7 +234,8 @@ function hideAndSeekUpdateLocation(code, latitude, longitude) {
 
 module.exports = {
     addOwnerToMatch,
-    addPlayerToMatch,
+    addPlayerToTGMatch,
+    addPlayerToHASMatch,
     startBroadcast,
     stopBroadcast,
     cancelBroadcast,
@@ -242,5 +243,5 @@ module.exports = {
     tapGamePointsNotification,
     hideAndSeekStartTimer,
     hideAndSeekRequestLocation,
-    hideAndSeekUpdateLocation
+    hideAndSeekUpdateLocation,
 };
