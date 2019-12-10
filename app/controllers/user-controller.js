@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt');
 const User = require('../models/user-model');
 const Thingy = require('../models/thingy-model');
 const Utilities = require('../services/utility-service');
+const Game = require('../models/game-model');
+const HighScore = require('../models/highscore-model');
 
 const USER_FIELDS_PROFILE_SHORT = 'username createdAt -_id';
 const USER_FIELDS_PROFILE_FULL = '-_id -hash';
@@ -137,9 +139,41 @@ async function changeFavoriteThingy(ctx, next) {
     ctx.status = 200;
 }
 
+/**
+ * Find the best results of a user for each game.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findHighscores(ctx, next) {
+    const { username } = ctx.params;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    const highScores = {};
+
+    highScores[Game.TAP_GAME] = {
+        name: Game.TAP_GAME_TITLE,
+        gameKey: Game.TAP_GAME,
+        highScores: await HighScore.find({ gameKey: Game.TAP_GAME, user: username }).sort({ score: -1 }).limit(5),
+    };
+    highScores[Game.HIDE_AND_SEEK] = {
+        name: Game.HIDE_AND_SEEK_TITLE,
+        gameKey: Game.HIDE_AND_SEEK,
+        highScores: await HighScore.find({ gameKey: Game.HIDE_AND_SEEK, user: username }).sort({ score: -1 }).limit(5),
+    };
+
+    ctx.body = highScores;
+}
+
 module.exports = {
     findAll,
     findOne,
+    findHighscores,
     change,
     changePassword,
     changeFavoriteThingy,
