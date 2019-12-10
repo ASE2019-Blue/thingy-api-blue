@@ -95,8 +95,8 @@ async function changeStatus(ctx, next) {
         case Match.STATE_RUNNING:
             if (gameKey === Game.HIDE_AND_SEEK) {
                 //TODO: remove (only for debug)
-                await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
-                // await Hideandseek.createTeams(match);
+                // await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
+                await Hideandseek.createTeams(match);
             }
             // send start message to everyone in the match
             Wss.startBroadcast(code);
