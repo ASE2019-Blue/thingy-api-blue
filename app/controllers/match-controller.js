@@ -93,8 +93,11 @@ async function changeStatus(ctx, next) {
             }
             break;
         case Match.STATE_RUNNING:
-            if (gameKey === Game.HIDE_AND_SEEK)
-                await Hideandseek.createTeams(match);
+            if (gameKey === Game.HIDE_AND_SEEK) {
+                //TODO: remove (only for debug)
+                await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
+                // await Hideandseek.createTeams(match);
+            }
             // send start message to everyone in the match
             Wss.startBroadcast(code);
             // For each game add a test on gameKey and launch the corresponding one
@@ -130,15 +133,21 @@ async function subscribe(ctx, next) {
     if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
-    // select an available color and remove it from the array of colors still available
-    const { colors } = match;
-    const choosenColor = colors.pop();
-    match.colors = colors;
+    if(match.gameKey === Game.TAP_GAME) {
+        // select an available color and remove it from the array of colors still available
+        const { colors } = match;
+        const choosenColor = colors.pop();
+        match.colors = colors;
+        
+        // send join message to everyone in the match and move the joining player to the match on the websocket server
+        Wss.addPlayerToMatch(user.username, code, choosenColor);
+    
+        match.players.push({ name: user.username, color: choosenColor, score: '0' });
+    } else if(match.gameKey === Game.HIDE_AND_SEEK) {
+        Wss.addPlayerToMatch(user.username, code);
+        match.players.push({ name: user.username, score: '0' });
+    }
 
-    // send join message to everyone in the match and move the joining player to the match on the websocket server
-    Wss.addPlayerToMatch(user.username, code, choosenColor);
-
-    match.players.push({ name: user.username, color: choosenColor, score: '0' });
     match.save();
     ctx.body = match; // returns a match
     ctx.status = 200;
@@ -156,11 +165,42 @@ async function unsubscribe(ctx, next) {
 
     const playerIndex = match.players.findIndex((p) => p.name === user.username);
     if (playerIndex === -1) { ctx.throw(400, { error: 'Player not found!' }); }
-    const colorAvailableAgain = match.players[playerIndex].color;
-    match.colors.push(colorAvailableAgain);
+    if(match.gameKey === Game.TAP_GAME) {
+        const colorAvailableAgain = match.players[playerIndex].color;
+        match.colors.push(colorAvailableAgain);
+    }
     match.players.splice(playerIndex, 1);
     match.save();
     ctx.status = 200;
+}
+
+async function changeHiderStatus(ctx, next) {
+    const { code } = ctx.params;
+    const { catched } = ctx.request.body;
+    
+    const match = await Match.MODEL.findOne({ code });
+    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
+    if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
+    
+    match.config['catched'] = catched;
+    match.markModified('config'); // so that save recognizes the inner change
+    await match.save();
+}
+
+async function changeHiderLocation(ctx, next) {
+    const { code } = ctx.params;
+    const { latitude, longitude, requestId } = ctx.request.body;
+    
+    const match = await Match.MODEL.findOne({ code });
+    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
+    if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
+    
+    if(Hideandseek.isValidLocationRequestResponse(code, requestId)){
+        Wss.hideAndSeekUpdateLocation(code,latitude,longitude);
+        ctx.status = 200;
+    } else {
+        ctx.throw(208, { error: 'Request already processed' });
+    }
 }
 
 module.exports = {
@@ -170,4 +210,6 @@ module.exports = {
     changeStatus,
     subscribe,
     unsubscribe,
+    changeHiderStatus,
+    changeHiderLocation
 };
