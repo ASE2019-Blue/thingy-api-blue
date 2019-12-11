@@ -130,7 +130,7 @@ async function subscribe(ctx, next) {
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
-    if (match == null) { ctx.throw(400, { error: 'Not a valid code!' }); }
+    if (match === null || match === undefined) { ctx.throw(400, { error: 'Not a valid code!' }); }
     if (match.players.findIndex((p) => p.name === user.username) !== -1) { ctx.throw(400, { error: 'User already subscribed!' }); }
 
     if (match.gameKey === Game.TAP_GAME) {
@@ -158,7 +158,7 @@ async function unsubscribe(ctx, next) {
     const { username } = ctx.state.user;
     const user = await User.findOne({ username });
     const match = await Match.MODEL.findOne({ code });
-    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
+    if (match === null || match === undefined) { ctx.throw(400, { error: 'Not a valid code' }); }
 
     // send quit message to everyone in the match and remove the joining player from the match on the websocket server
     Wss.removePlayerFromMatch(user.username, code);
@@ -179,7 +179,7 @@ async function changeHiderStatus(ctx, next) {
     const { catched } = ctx.request.body;
 
     const match = await Match.MODEL.findOne({ code });
-    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
+    if (match === null || match === undefined) { ctx.throw(400, { error: 'Not a valid code' }); }
     if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
 
     match.config.catched = catched;
@@ -192,7 +192,7 @@ async function changeHiderLocation(ctx, next) {
     const { latitude, longitude, requestId } = ctx.request.body;
 
     const match = await Match.MODEL.findOne({ code });
-    if (match == null) { ctx.throw(400, { error: 'Not a valid code' }); }
+    if (match === null || match === undefined) { ctx.throw(400, { error: 'Not a valid code' }); }
     if (match.gameKey !== Game.HIDE_AND_SEEK) { ctx.throw(400, { error: 'Not a valid Hide and Seek code' }); }
 
     if (Hideandseek.isValidLocationRequestResponse(code, requestId)) {
