@@ -7,7 +7,7 @@
     "lint": "eslint --fix app/ || true",
     "server": "nodemon app/index.js",
     "start": "echo 'This script is deprecated. Use `npm run server` instead.'",
-    "test": "nyc --reporter=lcov --all mocha --recursive --timeout 15000"
+    "test": "nyc --reporter=lcov --all mocha --recursive --timeout 15000 --exit"
   },
   "keywords": [
     "rest",
