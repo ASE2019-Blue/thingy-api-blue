@@ -142,8 +142,8 @@ async function getRating(ctx, next) {
     if (!Game.GAME_KEYS.includes(gameKey)) {
         ctx.throw(404, { error: 'Game not found' });
     }
-
-    ctx.body = calculateRating(gameKey);
+    
+    ctx.body = await calculateRating(gameKey);
 }
 
 
