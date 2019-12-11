@@ -9,12 +9,12 @@ async function createTeams(match) {
 
 async function createTeamsDebug(match, ownerUsername) {
     const hiders = [];
-    const seakers = [];
+    const seekers = [];
     match.players.forEach((user) => {
-        if (user.name !== ownerUsername) { hiders.push(user); } else { seakers.push(user); }
+        if (user.name !== ownerUsername) { hiders.push(user); } else { seekers.push(user); }
     });
     match.config.hiders = hiders;
-    match.config.seekers = seakers;
+    match.config.seekers = seekers;
     match.markModified('config'); // so that save recognizes the inner change
     await match.save();
 }

@@ -185,6 +185,7 @@ async function changeHiderStatus(ctx, next) {
     match.config.catched = catched;
     match.markModified('config'); // so that save recognizes the inner change
     await match.save();
+    ctx.status = 200;
 }
 
 async function changeHiderLocation(ctx, next) {
