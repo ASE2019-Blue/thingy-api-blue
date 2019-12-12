@@ -50,8 +50,7 @@ async function start(match) {
     // array of selected colors by the client
     const colors = new Array(players.length);
     for (let i = players.length - 1; i >= 0; i--) {
-        colors[i] = `1,${players[i].color}`;
-        players[i].color = colors[i];
+        colors[i] = players[i].color;
     }
 
     const pointsPlayer = new Map();
