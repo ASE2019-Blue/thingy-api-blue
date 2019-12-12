@@ -41,28 +41,6 @@ async function find(ctx, next) {
 
 
 /**
- * Find one match by id.
- *
- * @param ctx
- * @param next
- * @returns {Promise<void>}
- */
-async function updatePlayers(ctx, next) {
-    const { matchId } = ctx.params;
-    const { playersArray } = ctx.request.body;
-    const match = await Match.MODEL.findOne({ _id: matchId });
-    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
-
-    console.log(playersArray);
-
-    match.players = playersArray;
-    match.save();
-
-    ctx.status = 200;
-    ctx.body = match;
-}
-
-/**
  * Change the state of a match.
  *
  * @param ctx
@@ -139,8 +117,11 @@ async function subscribe(ctx, next) {
 
     // select an available color and remove it from the array of colors still available
     const { colors } = match;
+    console.log(colors);
     const choosenColor = colors.pop();
+    console.log(colors);
     match.colors = colors;
+
 
     // send join message to everyone in the match and move the joining player to the match on the websocket server
     Wss.addPlayerToMatch(user.username, code, choosenColor);
@@ -151,7 +132,9 @@ async function subscribe(ctx, next) {
         color: choosenColor,
         score: 0,
     });
-    match.save();
+
+    await match.save();
+
     ctx.body = match; // returns a match
     ctx.status = 200;
 }
@@ -171,14 +154,13 @@ async function unsubscribe(ctx, next) {
     const colorAvailableAgain = match.players[playerIndex].color;
     match.colors.push(colorAvailableAgain);
     match.players.splice(playerIndex, 1);
-    match.save();
+    await match.save();
     ctx.status = 200;
 }
 
 module.exports = {
     findAll,
     find,
-    updatePlayers,
     changeStatus,
     subscribe,
     unsubscribe,

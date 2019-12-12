@@ -58,7 +58,7 @@ function addOwnerToMatch(username, code) {
  */
 function addPlayerToMatch(username, code, color) {
     try {
-        const joinMsg = { msg: 'join', player: username, color };
+        const joinMsg = { msg: 'join', player: username, color: color };
         wss.clients.forEach((client) => {
             if (client._id === username) {
                 client.matchCode = code;
@@ -160,7 +160,7 @@ function removePlayerFromMatch(username, code) {
  */
 function tapGamePointsNotification(playerName, points, code) {
     try {
-        const msg = { msg: 'points', player: playerName, points };
+        const msg = { msg: 'points', player: playerName, points: points };
         wss.clients.forEach((user) => {
             if (user.matchCode === code) {
                 user.send(JSON.stringify(msg));
