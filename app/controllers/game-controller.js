@@ -93,7 +93,7 @@ async function addMatch(ctx, next) {
     if (gameKey === Game.TAP_GAME) {
         match.config = { numberOfRounds: matchDto.config.numberOfRounds };
     } else if (gameKey === Game.HIDE_AND_SEEK) {
-        match.config = { gameTime: matchDto.config.gameTime };
+        match.config = { gameTime: matchDto.config.gameTime , catched: false};
     }
     match.thingys = matchDto.thingys;
     // const user = await User.findOne({ username });
