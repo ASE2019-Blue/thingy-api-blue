@@ -13,6 +13,7 @@ const userCredentials = {
 
 describe("Route: thingys/", () => {
   var token;
+  var thingyId;
   before(done => {
     chai
         .request(server)
@@ -23,10 +24,7 @@ describe("Route: thingys/", () => {
           expect(err).to.not.exist;
           expect(res.status).to.be.eql(200);
           expect(res.type).to.be.eql("application/json");
-          expect(res.body).to.satisfy(function (val) {
-            token = res.body.token;
-            return true;
-          });
+          token = res.body.token;
           done();
         });
   });
@@ -44,6 +42,7 @@ describe("Route: thingys/", () => {
           expect(res.body).to.satisfy(function (val) {
             return  (Array.isArray(val));
           });
+          thingyId = res.body[0]._id;
           done();
         });
     });
@@ -60,6 +59,80 @@ describe("Route: thingys/", () => {
           expect(res.body).to.satisfy(function (val) {
             return  (Array.isArray(val));
           });
+          done();
+        });
+    });
+  });
+
+  describe("Sub-route: POST /:thingyId/lock", () => {
+    //Only works when thingy is unlocked
+    it("Should return 200", done => {
+      chai
+        .request(server)
+        .post('/thingys/'+thingyId+'/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(200);
+          done();
+        });
+    });
+    it("Lock same thingy a second time: should return 400", done => {
+      chai
+        .request(server)
+        .post('/thingys/'+thingyId+'/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(400);
+          done();
+        });
+    });
+    it("Wrong thingyId: should return 400", done => {
+      chai
+        .request(server)
+        .post('/thingys/000000000000000000000000/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(400);
+          done();
+        });
+    });
+  });
+
+  describe("Sub-route: DELETE /:thingyId/lock", () => {
+    //Only works when thingy is unlocked
+    it("Should return 200", done => {
+      chai
+        .request(server)
+        .delete('/thingys/'+thingyId+'/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(200);
+          done();
+        });
+    });
+    it("Lock same thingy a second time: should return 400", done => {
+      chai
+        .request(server)
+        .delete('/thingys/'+thingyId+'/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(400);
+          done();
+        });
+    });
+    it("Wrong thingyId: should return 400", done => {
+      chai
+        .request(server)
+        .delete('/thingys/000000000000000000000000/lock')
+        .set("Authorization", "Bearer " + token)
+        .end((err, res) => {
+          expect(err).to.not.exist;
+          expect(res.status).to.be.eql(400);
           done();
         });
     });
