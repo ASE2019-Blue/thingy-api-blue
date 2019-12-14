@@ -93,17 +93,10 @@ async function addMatch(ctx, next) {
     if (gameKey === Game.TAP_GAME) {
         match.config = { numberOfRounds: matchDto.config.numberOfRounds };
     } else if (gameKey === Game.HIDE_AND_SEEK) {
-        match.config = { gameTime: matchDto.config.gameTime , catched: false};
+        match.config = { gameTime: matchDto.config.gameTime, catched: false };
     }
     match.thingys = matchDto.thingys;
-    // const user = await User.findOne({ username });
     match.players = matchDto.config.players;
-    // match.players.push({
-    //     name: user.username,
-    //     user: user.username,
-    //     color: '255,0,0',
-    //     score: 0,
-    // });
     match.code = CodeGenerator.makeCode(5);
     if (gameKey === Game.TAP_GAME) {
         match.colors = matchDto.colors;

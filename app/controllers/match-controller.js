@@ -96,7 +96,10 @@ async function changeStatus(ctx, next) {
             if (gameKey === Game.HIDE_AND_SEEK) {
                 // TODO: remove (only for debug)
                 // await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
-                await Hideandseek.createTeams(match);
+                const couldCreateTeams = await Hideandseek.createTeams(match);
+                if (!couldCreateTeams) {
+                    ctx.throw(400, 'Need at least two users');
+                }
             }
             // send start message to everyone in the match
             Wss.startBroadcast(code);

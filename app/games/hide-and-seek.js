@@ -1,10 +1,49 @@
 const Wss = require('../websocket');
 
 async function createTeams(match) {
-    match.config.hiders = match.players.slice(0, Math.floor(match.players.length / 2));
-    match.config.seekers = match.players.slice(Math.floor(match.players.length / 2));
+    const users = [];
+    const players = [];
+    const hiders = [];
+    const seekers = [];
+
+    // Divide players in players with user account and players without
+    match.players.forEach((player) => {
+        if (player.user === null) {
+            players.push(player);
+        } else {
+            users.push(player);
+        }
+    });
+
+    // Cannot play if not two real users
+    if (users.length < 2) {
+        return false;
+    }
+
+    let divider = 0;
+    users.forEach((player) => {
+        if (divider % 2) {
+            hiders.push(player);
+        } else {
+            seekers.push(player);
+        }
+        divider += 1;
+    });
+    players.forEach((player) => {
+        if (divider % 2) {
+            hiders.push(player);
+        } else {
+            seekers.push(player);
+        }
+        divider += 1;
+    });
+
+    match.config.hiders = hiders;
+    match.config.seekers = seekers;
     match.markModified('config'); // so that save recognizes the inner change
     await match.save();
+
+    return true;
 }
 
 async function createTeamsDebug(match, ownerUsername) {
