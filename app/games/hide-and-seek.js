@@ -46,18 +46,6 @@ async function createTeams(match) {
     return true;
 }
 
-async function createTeamsDebug(match, ownerUsername) {
-    const hiders = [];
-    const seekers = [];
-    match.players.forEach((user) => {
-        if (user.name !== ownerUsername) { hiders.push(user); } else { seekers.push(user); }
-    });
-    match.config.hiders = hiders;
-    match.config.seekers = seekers;
-    match.markModified('config'); // so that save recognizes the inner change
-    await match.save();
-}
-
 const requestedUpdateIndex = {};
 const intervals = {};
 async function start(match) {
@@ -107,5 +95,5 @@ async function stop(match) {
 }
 
 module.exports = {
-    start, stop, createTeams, createTeamsDebug, isValidLocationRequestResponse,
+    start, stop, createTeams, isValidLocationRequestResponse,
 };
