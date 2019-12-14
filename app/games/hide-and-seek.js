@@ -1,4 +1,5 @@
 const Wss = require('../websocket');
+const HighScore = require('../models/highscore-model');
 
 async function createTeams(match) {
     const users = [];
@@ -49,6 +50,11 @@ async function createTeams(match) {
 const requestedUpdateIndex = {};
 const intervals = {};
 async function start(match) {
+    // Save start time
+    match.config.startTime = Date.now();
+    match.markModified('config'); // so that save recognizes the inner change
+    match.save();
+
     const { gameTime } = match.config;
     let requestTime = gameTime / 6;
     let nextRequest = requestTime;
@@ -62,7 +68,7 @@ async function start(match) {
             if (timer >= gameTime) {
                 clearInterval(intervals[match.code]);
                 delete intervals[match.code];
-                endMatch(match, false);
+                await endMatch(match);
             } else if (timer >= nextRequest) {
                 requestTime *= 0.85;
                 if (requestTime < 1) requestTime = 1;
@@ -70,7 +76,7 @@ async function start(match) {
                 Wss.hideAndSeekRequestLocation(match.code, nextRequestId);
                 nextRequestId += 1;
             }
-        }, 1 * 1000);
+        }, 1000);
         intervals[match.code] = interval;
     }, 5 * 1000);
 }
@@ -83,15 +89,58 @@ function isValidLocationRequestResponse(matchCode, requestId) {
     return false;
 }
 
-async function endMatch(match, catched) {
-    // TODO: add statistics
+async function endMatch(match) {
+    await createHighscoreRecords(match);
     Wss.stopBroadcast(match.code);
 }
 
 async function stop(match) {
     clearInterval(intervals[match.code]);
     delete intervals[match.code];
+    await createHighscoreRecords(match);
     Wss.stopBroadcast(match.code);
+}
+
+async function createHighscoreRecords(match) {
+    const { startTime } = match.config;
+    const endTime = Date.now();
+    const timeDifference = Math.floor((endTime - startTime) / 1000);
+    const percentageDifference = 1 - timeDifference / match.config.gameTime;
+    const maxPoints = 200;
+
+    let pointsForWinner = Math.floor(maxPoints * percentageDifference);
+    pointsForWinner = pointsForWinner > maxPoints ? maxPoints : pointsForWinner;
+    pointsForWinner = pointsForWinner < 0 ? 0 : pointsForWinner;
+
+    const highScoreRecords = [];
+
+    if (match.config.catched) {
+        match.config.seekers.forEach((player) => {
+            if (player.user === null || player.user === undefined) {
+                return;
+            }
+
+            highScoreRecords.push(prepareHighscoreRecord(match, player, pointsForWinner));
+        });
+    } else {
+        match.config.hiders.forEach((player) => {
+            if (player.user === null || player.user === undefined) {
+                return;
+            }
+
+            highScoreRecords.push(prepareHighscoreRecord(match, player, pointsForWinner));
+        });
+    }
+    await HighScore.insertMany(highScoreRecords);
+}
+
+function prepareHighscoreRecord(match, player, score) {
+    const highScoreRecord = new HighScore();
+    highScoreRecord.gameKey = match.gameKey;
+    highScoreRecord.match = match;
+    highScoreRecord.user = player.user;
+    highScoreRecord.score = parseInt(score, 10);
+    return highScoreRecord;
 }
 
 module.exports = {
