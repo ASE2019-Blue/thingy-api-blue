@@ -16,9 +16,6 @@ const MATCH_FIELDS_WITHOUT_THINGY = '-_thingys';
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     const matches = await Match.MODEL.find({}).select(MATCH_FIELDS_WITHOUT_THINGY);
     ctx.body = matches;
 }
@@ -31,10 +28,7 @@ async function findAll(ctx, next) {
  * @returns {Promise<void>}
  */
 async function find(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
     const { matchId } = ctx.params;
-    await Utilities.sleep(800);
     const match = await Match.MODEL.findOne({ _id: matchId });
     if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
     ctx.body = match;

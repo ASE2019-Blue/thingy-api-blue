@@ -16,9 +16,6 @@ const USER_FIELDS_PROFILE_FULL = '-_id -hash';
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     ctx.body = await User.find({}).select(USER_FIELDS_PROFILE_SHORT);
 }
 
@@ -37,10 +34,6 @@ async function findOne(ctx, next) {
     if (!user) {
         ctx.throw(404, 'User not found');
     }
-
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
 
     ctx.body = user;
 }

@@ -28,9 +28,6 @@ async function calculateRating(gameKey) {
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     const games = Game.GAMES;
     for (let i = 0; i < games.length; i++) {
         const average = await calculateRating(games[i].key);
@@ -47,9 +44,6 @@ async function findAll(ctx, next) {
  * @returns {Promise<void>}
  */
 async function getColors(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     const { colors } = ConfigThingy;
     const colorsArray = Object.values(colors);
     ctx.body = colorsArray;
