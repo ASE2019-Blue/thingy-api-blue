@@ -136,7 +136,7 @@ async function getRating(ctx, next) {
         ctx.throw(404, { error: 'Game not found' });
     }
 
-    ctx.body = calculateRating(gameKey);
+    ctx.body = await calculateRating(gameKey);
 }
 
 

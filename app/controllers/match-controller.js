@@ -54,8 +54,6 @@ async function updatePlayers(ctx, next) {
     const match = await Match.MODEL.findOne({ _id: matchId });
     if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
 
-    console.log(playersArray);
-
     match.players = playersArray;
     match.save();
 
