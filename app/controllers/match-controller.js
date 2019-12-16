@@ -133,7 +133,9 @@ async function subscribe(ctx, next) {
         // send join message to everyone in the match and move the joining player to the match on the websocket server
         Wss.addPlayerToTGMatch(user.username, code, choosenColor);
 
-        match.players.push({ name: user.username, user: user.username, color: choosenColor, score: '0' });
+        match.players.push({
+            name: user.username, user: user.username, color: choosenColor, score: '0',
+        });
     } else if (match.gameKey === Game.HIDE_AND_SEEK) {
         Wss.addPlayerToHASMatch(user.username, code);
         match.players.push({ name: user.username, score: '0' });
