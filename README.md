@@ -16,6 +16,10 @@ The documentation for this API is written as an OpenAPI Specification. Copy the 
 
 To apply the coding standards to the codebase automatically, run `npm run lint`. If errors occur, fix them manually.
 
+## Running tests
+
+To run the tests for this project, run `npm run test`.
+
 ## Travis CI
 
 This project uses [Travis CI](https://travis-ci.com/dashboard) as a continuous integration tool.
