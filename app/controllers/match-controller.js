@@ -42,26 +42,6 @@ async function find(ctx, next) {
 
 
 /**
- * Find one match by id.
- *
- * @param ctx
- * @param next
- * @returns {Promise<void>}
- */
-async function updatePlayers(ctx, next) {
-    const { matchId } = ctx.params;
-    const { playersArray } = ctx.request.body;
-    const match = await Match.MODEL.findOne({ _id: matchId });
-    if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
-
-    match.players = playersArray;
-    match.save();
-
-    ctx.status = 200;
-    ctx.body = match;
-}
-
-/**
  * Change the state of a match.
  *
  * @param ctx
@@ -72,12 +52,16 @@ async function changeStatus(ctx, next) {
     const { matchId } = ctx.params;
     const { state } = ctx.request.body;
     if (!Match.MATCH_STATES.includes(state)) ctx.throw(400, 'Invalid state');
-    if (Match.MATCH_STATES === Match.STATE_CREATED) ctx.throw(400, 'Canot change to created state');
+    if (state === Match.STATE_CREATED) ctx.throw(400, 'Cannot change to created state');
 
     const match = await Match.MODEL.findOne({ _id: matchId }).populate('thingys');
     if (match === null || match === undefined) ctx.throw(404, { error: 'Match not found' });
+    if (match.state === Match.STATE_FINISHED) ctx.throw(404, { error: 'Cannot change state of a finished match' });
+    if (match.state === Match.STATE_CANCELED) ctx.throw(404, { error: 'Cannot change state of a canceled match' });
+
     const { gameKey } = match;
     const { code } = match;
+
     try {
         switch (state) {
         case Match.STATE_CANCELLED:
@@ -118,6 +102,12 @@ async function changeStatus(ctx, next) {
                 Hideandseek.stop(match);
             }
             break;
+        case Match.STATE_CANCELED:
+            await Match.MODEL.findOneAndUpdate(
+                { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+                { state: Match.STATE_CANCELED },
+            );
+            break;
         default:
         }
     } catch (err) {
@@ -143,13 +133,13 @@ async function subscribe(ctx, next) {
         // send join message to everyone in the match and move the joining player to the match on the websocket server
         Wss.addPlayerToTGMatch(user.username, code, choosenColor);
 
-        match.players.push({ name: user.username, color: choosenColor, score: '0' });
+        match.players.push({ name: user.username, user: user.username, color: choosenColor, score: '0' });
     } else if (match.gameKey === Game.HIDE_AND_SEEK) {
         Wss.addPlayerToHASMatch(user.username, code);
         match.players.push({ name: user.username, score: '0' });
     }
 
-    match.save();
+    await match.save();
     ctx.body = match; // returns a match
     ctx.status = 200;
 }
@@ -171,7 +161,7 @@ async function unsubscribe(ctx, next) {
         match.colors.push(colorAvailableAgain);
     }
     match.players.splice(playerIndex, 1);
-    match.save();
+    await match.save();
     ctx.status = 200;
 }
 
@@ -208,7 +198,6 @@ async function changeHiderLocation(ctx, next) {
 module.exports = {
     findAll,
     find,
-    updatePlayers,
     changeStatus,
     subscribe,
     unsubscribe,

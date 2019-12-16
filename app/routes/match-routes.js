@@ -9,7 +9,6 @@ router.get('/', Ctrl.findAll)
     .post('/invitations/:code', Ctrl.subscribe)
     .del('/invitations/:code', Ctrl.unsubscribe)
     .put('/:matchId/state', Ctrl.changeStatus)
-    .put('/:matchId/players', Ctrl.updatePlayers)
     .put('/hideAndSeek/:code/hiderStatus', Ctrl.changeHiderStatus)
     .put('/hideAndSeek/:code/hiderLocation', Ctrl.changeHiderLocation);
 
