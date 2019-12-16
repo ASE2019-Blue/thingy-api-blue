@@ -221,6 +221,66 @@ paths:
         500:
           description: Unexpected error
 
+  /matches/hideAndSeek/{matchId}/hiderStatus:
+    put:
+      summary: Change the statis of the hiders
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Was the hider catched?
+        content:
+          application/json:
+            schema:
+              properties:
+                catched:
+                  type: boolean
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Invalid state
+        404:
+          description: Match not found
+        500:
+          description: Unexpected error
+
+  /matches/hideAndSeek/{matchId}/hiderLocation:
+    put:
+      summary: Change the location of the hiders
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Hider information and requestId
+        content:
+          application/json:
+            schema:
+              properties:
+                longitude:
+                  type: number
+                latitude:
+                  type: number
+                requestId:
+                  type: number
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Invalid state
+        404:
+          description: Match not found
+        500:
+          description: Unexpected error
+
   /matches/invitations/{code}:
     post:
       summary: Player enteres the game

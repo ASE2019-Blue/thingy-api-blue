@@ -12,7 +12,7 @@ const config = {
 const systemColors = {
     idle: '5,2,0',
     none: '0,0,0',
-}
+};
 
 const colors = {
     red: '255,0,0',

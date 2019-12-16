@@ -8,6 +8,8 @@ router.get('/', Ctrl.findAll)
     .get('/:matchId', Ctrl.find)
     .post('/invitations/:code', Ctrl.subscribe)
     .del('/invitations/:code', Ctrl.unsubscribe)
-    .put('/:matchId/state', Ctrl.changeStatus);
+    .put('/:matchId/state', Ctrl.changeStatus)
+    .put('/hideAndSeek/:code/hiderStatus', Ctrl.changeHiderStatus)
+    .put('/hideAndSeek/:code/hiderLocation', Ctrl.changeHiderLocation);
 
 module.exports = router.routes();

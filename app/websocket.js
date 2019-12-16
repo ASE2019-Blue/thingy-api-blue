@@ -50,15 +50,37 @@ function addOwnerToMatch(username, code) {
 }
 
 /**
- * Add a client to a match.
+ * Add a client to a match (tap game).
  *
  * @param username
  * @param code
  * @param color
  */
-function addPlayerToMatch(username, code, color) {
+function addPlayerToTGMatch(username, code, color) {
     try {
-        const joinMsg = { msg: 'join', player: username, color: color };
+        const joinMsg = { msg: 'join', player: username, color };
+        wss.clients.forEach((client) => {
+            if (client._id === username) {
+                client.matchCode = code;
+            }
+            if (client.matchCode === code) {
+                client.send(JSON.stringify(joinMsg));
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+/**
+ * Add a client to a match (Hide and seek).
+ *
+ * @param username
+ * @param code
+ */
+function addPlayerToHASMatch(username, code) {
+    try {
+        const joinMsg = { msg: 'join', player: username };
         wss.clients.forEach((client) => {
             if (client._id === username) {
                 client.matchCode = code;
@@ -160,7 +182,46 @@ function removePlayerFromMatch(username, code) {
  */
 function tapGamePointsNotification(playerName, points, code) {
     try {
-        const msg = { msg: 'points', player: playerName, points: points };
+        const msg = { msg: 'points', player: playerName, points };
+        wss.clients.forEach((user) => {
+            if (user.matchCode === code) {
+                user.send(JSON.stringify(msg));
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function hideAndSeekStartTimer(code, duration) {
+    try {
+        const msg = { msg: 'startTimer', duration };
+        wss.clients.forEach((user) => {
+            if (user.matchCode === code) {
+                user.send(JSON.stringify(msg));
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function hideAndSeekRequestLocation(code, requestId) {
+    try {
+        const msg = { msg: 'requestLocation', requestId };
+        wss.clients.forEach((user) => {
+            if (user.matchCode === code) {
+                user.send(JSON.stringify(msg));
+            }
+        });
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+function hideAndSeekUpdateLocation(code, latitude, longitude) {
+    try {
+        const msg = { msg: 'location', latitude, longitude };
         wss.clients.forEach((user) => {
             if (user.matchCode === code) {
                 user.send(JSON.stringify(msg));
@@ -173,10 +234,14 @@ function tapGamePointsNotification(playerName, points, code) {
 
 module.exports = {
     addOwnerToMatch,
-    addPlayerToMatch,
+    addPlayerToTGMatch,
+    addPlayerToHASMatch,
     startBroadcast,
     stopBroadcast,
     cancelBroadcast,
     removePlayerFromMatch,
     tapGamePointsNotification,
+    hideAndSeekStartTimer,
+    hideAndSeekRequestLocation,
+    hideAndSeekUpdateLocation,
 };
