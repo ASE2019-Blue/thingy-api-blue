@@ -24,5 +24,13 @@
         "no-underscore-dangle": "off",
         "no-unused-vars": ["error", { "argsIgnorePattern": "next" }],
         "no-use-before-define": ["error", { "functions": false }]
-    }
+    },
+    "overrides": [
+        {
+            "files": ["*.test.js", "*.spec.js"],
+            "rules": {
+                "no-unused-expressions": "off"
+            }
+        }
+    ]
 }

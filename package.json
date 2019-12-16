@@ -5,6 +5,7 @@
   "main": "app/index.js",
   "scripts": {
     "lint": "eslint --fix app/ || true",
+    "lint-tests": "eslint --fix test/ || true",
     "server": "nodemon app/index.js",
     "start": "echo 'This script is deprecated. Use `npm run server` instead.'",
     "test": "nyc --reporter=lcov --all mocha --recursive --timeout 15000 --exit"
