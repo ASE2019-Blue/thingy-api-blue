@@ -1,7 +1,6 @@
 const Game = require('../models/game-model');
 const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
-const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
 const ConfigThingy = require('../config-thingy');
 const ThingyService = require('../services/thingy-service');

@@ -1,7 +1,6 @@
 const Game = require('../models/game-model');
 const Match = require('../models/match-model');
 const User = require('../models/user-model');
-const Utilities = require('../services/utility-service');
 const Tapgame = require('../games/tapgame');
 const Hideandseek = require('../games/hide-and-seek');
 const Wss = require('../websocket');

@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user-model');
 const Thingy = require('../models/thingy-model');
-const Utilities = require('../services/utility-service');
 const Game = require('../models/game-model');
 const HighScore = require('../models/highscore-model');
 
