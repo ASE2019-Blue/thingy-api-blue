@@ -8,6 +8,7 @@ router.get('/', Ctrl.findAll)
     .get('/:username', Ctrl.findOne)
     .put('/:username', Ctrl.change)
     .get('/:username/highscores', Ctrl.findHighscores)
+    .get('/:username/statistics', Ctrl.findStatistics)
     .put('/:username/password', Ctrl.changePassword)
     .put('/:username/thingy', Ctrl.changeFavoriteThingy);
 

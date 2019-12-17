@@ -162,10 +162,40 @@ async function findHighscores(ctx, next) {
     ctx.body = highScores;
 }
 
+/**
+ * Find the statistics of a user.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findStatistics(ctx, next) {
+    const { username } = ctx.params;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    let totalHighScore = 0;
+    let totalNumberOfPlayedMatches = 0;
+    const highScoreRecords = await HighScore.find({ user: username });
+
+    if (Array.isArray(highScoreRecords)) {
+        highScoreRecords.forEach((highScoreRecord) => {
+            totalHighScore += highScoreRecord.score;
+        });
+        totalNumberOfPlayedMatches = highScoreRecords.length;
+    }
+
+    ctx.body = { totalHighScore, totalNumberOfPlayedMatches };
+}
+
 module.exports = {
     findAll,
     findOne,
     findHighscores,
+    findStatistics,
     change,
     changePassword,
     changeFavoriteThingy,

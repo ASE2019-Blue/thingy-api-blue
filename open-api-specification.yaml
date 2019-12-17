@@ -503,6 +503,27 @@ paths:
         404:
           description: User not found
 
+  /users/{username}/statistics:
+    get:
+      summary: Get the match statistics of a single user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
+        404:
+          description: User not found
+
   /users/{username}/thingy:
     put:
       summary: Change the favorite thingy of the current user
@@ -646,6 +667,16 @@ components:
           type: string
         newPassword:
           type: string
+    Statistics:
+      type: object
+      required:
+        - totalHighScore
+        - totalNumberOfPlayedMatches
+      properties:
+        totalHighScore:
+          type: integer
+        numberOfMatches:
+          type: integer
     Thingy:
       type: object
       required:
