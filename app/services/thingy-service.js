@@ -41,6 +41,18 @@ function recordThingyConnectionStatus() {
     });
 }
 
+async function lock(thingyId, username) {
+    const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
+    return thingy != null;
+}
+
+async function unlock(thingyId, username) {
+    const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
+    return thingy != null;
+}
+
 module.exports = {
     recordThingyConnectionStatus,
+    lock,
+    unlock
 };

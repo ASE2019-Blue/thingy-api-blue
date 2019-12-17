@@ -5,6 +5,7 @@ const Utilities = require('../services/utility-service');
 const Tapgame = require('../games/tapgame');
 const Hideandseek = require('../games/hide-and-seek');
 const Wss = require('../websocket');
+const ThingyService = require('../services/thingy-service');
 
 const MATCH_FIELDS_WITHOUT_THINGY = '-_thingys';
 
@@ -67,6 +68,7 @@ async function changeStatus(ctx, next) {
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 // Hideandseek
             }
+            await ThingyService.unlock(match.thingys[0]._id, match.owner);
             break;
         case Match.STATE_RUNNING:
             if (gameKey === Game.HIDE_AND_SEEK) {
@@ -95,12 +97,14 @@ async function changeStatus(ctx, next) {
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 Hideandseek.stop(match);
             }
+            await ThingyService.unlock(match.thingys[0]._id, match.owner);
             break;
         case Match.STATE_CANCELED:
             await Match.MODEL.findOneAndUpdate(
                 { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
                 { state: Match.STATE_CANCELED },
             );
+            await ThingyService.unlock(match.thingys[0]._id, match.owner);
             break;
         default:
         }

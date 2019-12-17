@@ -4,6 +4,7 @@ const Match = require('../models/match-model');
 const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
 const ConfigThingy = require('../config-thingy');
+const ThingyService = require('../services/thingy-service');
 const Wss = require('../websocket');
 
 async function calculateRating(gameKey) {
@@ -96,6 +97,7 @@ async function addMatch(ctx, next) {
         match.colors = matchDto.colors;
     }
     await match.save();
+    await ThingyService.lock(match.thingys[0], match.owner);
 
     // Add the owner to the match on the websocket server
     Wss.addOwnerToMatch(username, match.code);
