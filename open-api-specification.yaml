@@ -3,7 +3,12 @@ info:
   title: Thingy API
   version: '3.0.0-dev'
 servers:
+  - url: 'http://51.15.250.22/'
+    description: Production environment on VPS
+  - url: 'http://51.15.250.22:8442/'
+    description: Development environment on VPS
   - url: 'http://localhost:3000/'
+    description: Local development environment
 security:
   - basicAuth: []
 paths:
