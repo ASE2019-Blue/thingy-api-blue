@@ -21,6 +21,6 @@ describe('sleep()', () => {
 
         const actualDifference = timeAfter - timeBefore;
 
-        expect(actualDifference).to.be.at.least(difference);
+        expect(actualDifference).to.be.at.least(difference-5); // is not very precise
     });
 });
