@@ -1,11 +1,14 @@
 const config = {
     services: {
         userInterface: 'Thingy User Interface Service',
+        soundService: 'Thingy Sound Service',
     },
 
     characteristics: {
         led: 'Thingy LED Characteristic',
         button: 'Thingy Button Characteristic',
+        speaker: 'Thingy Speaker Data Characteristic',
+        soundConfiguration: 'Thingy Sound Configuration Characteristic',
     },
 };
 

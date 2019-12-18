@@ -68,6 +68,7 @@ async function changeStatus(ctx, next) {
             break;
         case Match.STATE_RUNNING:
             // change state to running
+            ThingyService.registerSound(match);
             await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
             if (gameKey === Game.HIDE_AND_SEEK) {
                 const couldCreateTeams = await Hideandseek.createTeams(match);

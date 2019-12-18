@@ -2,6 +2,7 @@ const Wss = require('../websocket');
 const Match = require('../models/match-model');
 const HighScore = require('../models/highscore-model');
 const ThingyService = require('../services/thingy-service');
+const Utilities = require('../services/utility-service');
 
 async function createTeams(match) {
     const users = [];
@@ -63,24 +64,33 @@ async function start(match) {
     let timer = 0;
     let nextRequestId = 0;
     requestedUpdateIndex[match.code] = nextRequestId;
-    setTimeout(() => {
-        Wss.hideAndSeekStartTimer(match.code, gameTime);
-        const interval = setInterval(async () => {
-            timer += 1;
-            if (timer >= gameTime) {
-                clearInterval(intervals[match.code]);
-                delete intervals[match.code];
-                await endMatch(match);
-            } else if (timer >= nextRequest) {
-                requestTime *= 0.85;
-                if (requestTime < 1) requestTime = 1;
-                nextRequest += requestTime;
-                Wss.hideAndSeekRequestLocation(match.code, nextRequestId);
-                nextRequestId += 1;
-            }
-        }, 1000);
-        intervals[match.code] = interval;
-    }, 5 * 1000);
+
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 1);
+
+    Wss.hideAndSeekStartTimer(match.code, gameTime);
+    const interval = setInterval(async () => {
+        timer += 1;
+        if (timer >= gameTime) {
+            clearInterval(intervals[match.code]);
+            delete intervals[match.code];
+            ThingyService.playSound(match, 1);
+            await endMatch(match);
+        } else if (timer >= nextRequest) {
+            requestTime *= 0.85;
+            if (requestTime < 1) requestTime = 1;
+            nextRequest += requestTime;
+            Wss.hideAndSeekRequestLocation(match.code, nextRequestId);
+            nextRequestId += 1;
+            ThingyService.playSound(match, 6);
+        }
+    }, 1000);
+    intervals[match.code] = interval;
 }
 
 function isValidLocationRequestResponse(matchCode, requestId) {

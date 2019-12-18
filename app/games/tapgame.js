@@ -82,7 +82,14 @@ async function start(match) {
     // -----------------GAME START HERE----------------------
     client.publish(ledPublish, `1,${configThingy.systemColors.none}`);
     // Wait 5 seconds to let people get ready
-    await Utilities.sleep(5000);
+    // await Utilities.sleep(5000);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 1);
 
     let _waiting = false;
     let choosenColor = randomColors.pop();
@@ -112,6 +119,7 @@ async function start(match) {
 
             // END
             if (randomColors.length === 0) {
+                ThingyService.playSound(match, 2);
                 stop(match);
             } else {
                 client.publish(ledPublish, `1,${configThingy.systemColors.none}`);

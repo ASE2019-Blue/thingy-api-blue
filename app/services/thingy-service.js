@@ -67,8 +67,28 @@ function _unsubscribe(thingy) {
     client.unsubscribe(buttonSubscription);
 }
 
+function registerSound(match) {
+    const { client } = Mqtt;
+
+    const thingyURI = match.thingys[0].macAddress;
+    const soundConfigSubscription = `${thingyURI}/${configThingy.config.services.soundService}/${configThingy.config.characteristics.soundConfiguration}`;
+    const configSound = `${soundConfigSubscription}/Set`;
+    client.publish(configSound, '3,2');
+}
+
+function playSound(match, soundId) {
+    const { client } = Mqtt;
+
+    const thingyURI = match.thingys[0].macAddress;
+    const speakerSubscription = `${thingyURI}/${configThingy.config.services.soundService}/${configThingy.config.characteristics.speaker}`;
+    const setSound = `${speakerSubscription}/Set`;
+    client.publish(setSound, `${soundId}`);
+}
+
 module.exports = {
     recordThingyConnectionStatus,
     lock,
     unlock,
+    registerSound,
+    playSound,
 };
