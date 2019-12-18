@@ -10,12 +10,13 @@ servers:
   - url: 'http://localhost:3000/'
     description: Local development environment
 security:
-  - basicAuth: []
+  - bearerAuth: []
 paths:
   /auth/token:
     post:
       summary: Generate an authentication token
       tags: ['Authentication']
+      security: []
       requestBody:
         description: Username and password of user to create token for
         required: true
@@ -324,6 +325,7 @@ paths:
     post:
       summary: Sign up a new user
       tags: ['Authentication']
+      security: []
       requestBody:
         description: User that needs to be registered
         required: true
@@ -557,9 +559,9 @@ paths:
 
 components:
   securitySchemes:
-    basicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
   schemas:
     AuthenticationToken:
       type: object
