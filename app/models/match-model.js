@@ -2,10 +2,11 @@ const mongoose = require('mongoose');
 const Game = require('../models/game-model');
 
 const STATE_CREATED = 'created';
+const STATE_CANCELLED = 'cancelled';
 const STATE_RUNNING = 'running';
 const STATE_FINISHED = 'finished';
 
-const MATCH_STATES = [STATE_CREATED, STATE_RUNNING, STATE_FINISHED];
+const MATCH_STATES = [STATE_CREATED, STATE_CANCELLED, STATE_RUNNING, STATE_FINISHED];
 
 const MatchSchema = new mongoose.Schema({
     gameKey: {
@@ -18,10 +19,11 @@ const MatchSchema = new mongoose.Schema({
         required: true,
     },
     players: [{
-          name: { type: String },
-          color: {type: String },
-          score: {type: String }
-        },
+        name: { type: String },
+        user: { type: String, ref: 'User' },
+        color: { type: String },
+        score: { type: String },
+    },
         // ref: 'User',
         // required: true,
     ],
@@ -40,6 +42,11 @@ const MatchSchema = new mongoose.Schema({
         ref: 'Thingy',
         required: true,
     }],
+    colors: {
+        type: Object,
+        // only required for tap game
+        // required: true,
+    },
     owner: {
         type: String,
         ref: 'User',
@@ -52,5 +59,5 @@ const MatchSchema = new mongoose.Schema({
 const MODEL = mongoose.model('Match', MatchSchema);
 
 module.exports = {
-    MODEL, MATCH_STATES, STATE_CREATED, STATE_RUNNING, STATE_FINISHED,
+    MODEL, MATCH_STATES, STATE_CREATED, STATE_RUNNING, STATE_FINISHED, STATE_CANCELLED,
 };

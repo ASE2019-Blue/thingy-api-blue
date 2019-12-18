@@ -1,7 +1,8 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/user-model');
 const Thingy = require('../models/thingy-model');
-const Utilities = require('../services/utility-service');
+const Game = require('../models/game-model');
+const HighScore = require('../models/highscore-model');
 
 const USER_FIELDS_PROFILE_SHORT = 'username createdAt -_id';
 const USER_FIELDS_PROFILE_FULL = '-_id -hash';
@@ -14,9 +15,6 @@ const USER_FIELDS_PROFILE_FULL = '-_id -hash';
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     ctx.body = await User.find({}).select(USER_FIELDS_PROFILE_SHORT);
 }
 
@@ -35,10 +33,6 @@ async function findOne(ctx, next) {
     if (!user) {
         ctx.throw(404, 'User not found');
     }
-
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
 
     ctx.body = user;
 }
@@ -114,23 +108,22 @@ async function changePassword(ctx, next) {
     ctx.status = 200;
 }
 
-async function changeFavoriteThingy(ctx, next){
+async function changeFavoriteThingy(ctx, next) {
     const { username } = ctx.params;
     const usernameOfLoggedInUser = ctx.state.user.username;
-    const {thingy} = ctx.request.body;
+    const { thingy } = ctx.request.body;
 
     if (username !== usernameOfLoggedInUser) {
         ctx.throw(400, 'You can not change values of someone else');
     }
 
-    let user = await User.findOne({username:usernameOfLoggedInUser});
+    const user = await User.findOne({ username: usernameOfLoggedInUser });
 
-    if(typeof thingy === 'undefined'){
+    if (typeof thingy === 'undefined') {
         user.favoriteThingy = null;
     } else {
-        let thingyObj = await Thingy.findById(thingy);
-        if(thingyObj == null)
-            ctx.throw(404, 'Thingy not found');
+        const thingyObj = await Thingy.findById(thingy);
+        if (thingyObj === null) ctx.throw(404, 'Thingy not found');
         user.favoriteThingy = thingy;
     }
     await user.save();
@@ -138,9 +131,71 @@ async function changeFavoriteThingy(ctx, next){
     ctx.status = 200;
 }
 
+/**
+ * Find the best results of a user for each game.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findHighscores(ctx, next) {
+    const { username } = ctx.params;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    const highScores = {};
+
+    highScores[Game.TAP_GAME] = {
+        name: Game.TAP_GAME_TITLE,
+        gameKey: Game.TAP_GAME,
+        highScores: await HighScore.find({ gameKey: Game.TAP_GAME, user: username }).sort({ score: -1 }).limit(5),
+    };
+    highScores[Game.HIDE_AND_SEEK] = {
+        name: Game.HIDE_AND_SEEK_TITLE,
+        gameKey: Game.HIDE_AND_SEEK,
+        highScores: await HighScore.find({ gameKey: Game.HIDE_AND_SEEK, user: username }).sort({ score: -1 }).limit(5),
+    };
+
+    ctx.body = highScores;
+}
+
+/**
+ * Find the statistics of a user.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function findStatistics(ctx, next) {
+    const { username } = ctx.params;
+
+    const user = await User.findOne({ username });
+    if (!user) {
+        ctx.throw(404, 'User not found');
+    }
+
+    let totalHighScore = 0;
+    let totalNumberOfPlayedMatches = 0;
+    const highScoreRecords = await HighScore.find({ user: username });
+
+    if (Array.isArray(highScoreRecords)) {
+        highScoreRecords.forEach((highScoreRecord) => {
+            totalHighScore += highScoreRecord.score;
+        });
+        totalNumberOfPlayedMatches = highScoreRecords.length;
+    }
+
+    ctx.body = { totalHighScore, totalNumberOfPlayedMatches };
+}
+
 module.exports = {
     findAll,
     findOne,
+    findHighscores,
+    findStatistics,
     change,
     changePassword,
     changeFavoriteThingy,

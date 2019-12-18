@@ -1,9 +1,10 @@
 const Game = require('../models/game-model');
 const GameRating = require('../models/game-rating-model');
 const Match = require('../models/match-model');
-const User = require('../models/user-model');
-const Utilities = require('../services/utility-service');
 const CodeGenerator = require('../services/invitation-service');
+const ConfigThingy = require('../config-thingy');
+const ThingyService = require('../services/thingy-service');
+const Wss = require('../websocket');
 
 async function calculateRating(gameKey) {
     const ratingEntries = await GameRating.find({ gameKey });
@@ -27,16 +28,25 @@ async function calculateRating(gameKey) {
  * @returns {Promise<void>}
  */
 async function findAll(ctx, next) {
-    // Add some latency for better async testing
-    // TODO Remove after development
-    await Utilities.sleep(800);
     const games = Game.GAMES;
-    for (let i = 0 ; i < games.length; i++) {
+    for (let i = 0; i < games.length; i++) {
         const average = await calculateRating(games[i].key);
-        // if(average !== NaN)
-        games[i]['rating'] = average;
+        games[i].rating = average;
     }
     ctx.body = games;
+}
+
+/**
+ * Find colors for players which work on the thingy.
+ *
+ * @param ctx
+ * @param next
+ * @returns {Promise<void>}
+ */
+async function getColors(ctx, next) {
+    const { colors } = ConfigThingy;
+    const colorsArray = Object.values(colors);
+    ctx.body = colorsArray;
 }
 
 /**
@@ -64,18 +74,33 @@ async function addMatch(ctx, next) {
         ctx.throw(400, { error: 'You need to provide a list of thingys to use for the match' });
     }
 
+    if (gameKey === Game.TAP_GAME) {
+        if (typeof matchDto.colors === 'undefined') {
+            ctx.throw(400, { error: 'You need to provide a table with the colors available and not available anymore.' });
+        }
+    }
+
     const { username } = ctx.state.user;
     const match = new Match.MODEL();
     match.gameKey = gameKey;
     match.owner = username;
-    match.config = { numberOfRounds: matchDto.config.numberOfRounds };
+    if (gameKey === Game.TAP_GAME) {
+        match.config = { numberOfRounds: matchDto.config.numberOfRounds };
+    } else if (gameKey === Game.HIDE_AND_SEEK) {
+        match.config = { gameTime: matchDto.config.gameTime, catched: false };
+    }
     match.thingys = matchDto.thingys;
-    const user = await User.findOne({ username });
     match.players = matchDto.config.players;
-    match.players.push({ name : user.username, color: "255,0,0", score: "0" });
     match.code = CodeGenerator.makeCode(5);
-
+    if (gameKey === Game.TAP_GAME) {
+        match.colors = matchDto.colors;
+    }
     await match.save();
+    await ThingyService.lock(match.thingys[0], match.owner);
+
+    // Add the owner to the match on the websocket server
+    Wss.addOwnerToMatch(username, match.code);
+
     ctx.body = match;
 }
 
@@ -106,12 +131,13 @@ async function getRating(ctx, next) {
         ctx.throw(404, { error: 'Game not found' });
     }
 
-    ctx.body = calculateRating(gameKey);
+    ctx.body = await calculateRating(gameKey);
 }
 
 
 module.exports = {
     findAll,
+    getColors,
     addMatch,
     addRating,
     getRating,

@@ -1,16 +1,22 @@
 openapi: 3.0.0
 info:
   title: Thingy API
-  version: '2.0.0'
+  version: '3.0.0'
 servers:
+  - url: 'http://51.15.250.22/'
+    description: Production environment on VPS
+  - url: 'http://51.15.250.22:8442/'
+    description: Development environment on VPS
   - url: 'http://localhost:3000/'
+    description: Local development environment
 security:
-  - basicAuth: []
+  - bearerAuth: []
 paths:
   /auth/token:
     post:
       summary: Generate an authentication token
       tags: ['Authentication']
+      security: []
       requestBody:
         description: Username and password of user to create token for
         required: true
@@ -132,6 +138,30 @@ paths:
         404:
           description: Game not found
 
+  /highscores:
+    get:
+      summary: Get the best results for every game
+      tags: ['Highscores']
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gameKey:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      gameKey:
+                        type: string
+                      highScores:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Highscore'
+
   /matches:
     get:
       summary: Get list of matches
@@ -197,9 +227,9 @@ paths:
         500:
           description: Unexpected error
 
-  /matches/{matchId}/players:
+  /matches/hideAndSeek/{matchId}/hiderStatus:
     put:
-      summary: Change match players array
+      summary: Change the statis of the hiders
       tags: ['Matches']
       parameters:
         - name: matchId
@@ -208,27 +238,54 @@ paths:
           schema:
             type: string
       requestBody:
-        description: playersArray
+        description: Was the hider catched?
         content:
           application/json:
             schema:
               properties:
-                playersArray:
-                  type: array
-                  items:
-                    type: object
-                    description: '{name: "Example", color: "0, 0, 0", score: "0"}'
+                catched:
+                  type: boolean
       responses:
         200:
-          description: Success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Match'
+          description: Successful opeation
+        400:
+          description: Invalid state
         404:
           description: Match not found
+        500:
+          description: Unexpected error
+
+  /matches/hideAndSeek/{matchId}/hiderLocation:
+    put:
+      summary: Change the location of the hiders
+      tags: ['Matches']
+      parameters:
+        - name: matchId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Hider information and requestId
+        content:
+          application/json:
+            schema:
+              properties:
+                longitude:
+                  type: number
+                latitude:
+                  type: number
+                requestId:
+                  type: number
+      responses:
+        200:
+          description: Successful opeation
+        400:
+          description: Invalid state
+        404:
+          description: Match not found
+        500:
+          description: Unexpected error
 
   /matches/invitations/{code}:
     post:
@@ -268,6 +325,7 @@ paths:
     post:
       summary: Sign up a new user
       tags: ['Authentication']
+      security: []
       requestBody:
         description: User that needs to be registered
         required: true
@@ -395,6 +453,37 @@ paths:
         404:
           description: User not found
 
+  /users/{username}/highscores:
+    get:
+      summary: Get the best results of a user for every game
+      tags: ['Highscores']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful opeation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gameKey:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                      gameKey:
+                        type: string
+                      highScores:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Highscore'
+
   /users/{username}/password:
     put:
       summary: Change the password of the current user
@@ -418,6 +507,27 @@ paths:
           description: Success
         400:
           description: Invalid request
+        404:
+          description: User not found
+
+  /users/{username}/statistics:
+    get:
+      summary: Get the match statistics of a single user
+      tags: ['Users']
+      parameters:
+        - name: username
+          in: path
+          description: Username of the user
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistics'
         404:
           description: User not found
 
@@ -449,9 +559,9 @@ paths:
 
 components:
   securitySchemes:
-    basicAuth:
+    bearerAuth:
       type: http
-      scheme: basic
+      scheme: bearer
   schemas:
     AuthenticationToken:
       type: object
@@ -478,6 +588,25 @@ components:
         icon:
           type: string
         rating:
+          type: number
+    Highscore:
+      type: object
+      required:
+        - _id
+        - gameKey
+        - match
+        - user
+        - score
+      properties:
+        _id:
+          type: string
+        gameKey:
+          type: string
+        match:
+          type: string
+        user:
+          type: string
+        score:
           type: number
     Match:
       allOf:
@@ -545,6 +674,16 @@ components:
           type: string
         newPassword:
           type: string
+    Statistics:
+      type: object
+      required:
+        - totalHighScore
+        - totalNumberOfPlayedMatches
+      properties:
+        totalHighScore:
+          type: integer
+        numberOfMatches:
+          type: integer
     Thingy:
       type: object
       required:

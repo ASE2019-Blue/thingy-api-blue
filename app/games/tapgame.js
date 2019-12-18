@@ -1,8 +1,10 @@
 const mqtt = require('../mqtt');
 const Match = require('../models/match-model');
+const HighScore = require('../models/highscore-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
-const websocket = require('../websocket');
+const Wss = require('../websocket');
+const ThingyService = require('../services/thingy-service');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -39,7 +41,6 @@ async function start(match) {
 
     const { client } = mqtt;
 
-    // For development purpose only: hardcoded MAC
     const thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
@@ -50,8 +51,7 @@ async function start(match) {
     // array of selected colors by the client
     const colors = new Array(players.length);
     for (let i = players.length - 1; i >= 0; i--) {
-        colors[i] = `1,${players[i].color}`;
-        players[i].color = colors[i];
+        colors[i] = players[i].color;
     }
 
     const pointsPlayer = new Map();
@@ -76,14 +76,20 @@ async function start(match) {
     // shuffle the array
     shuffle(randomColors);
 
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
     // -----------------END OF CONFIG------------------------
 
 
     // -----------------GAME START HERE----------------------
-    client.publish(ledPublish, configThingy.colors.none);
+    client.publish(ledPublish, `1,${configThingy.systemColors.none}`);
     // Wait 5 seconds to let people get ready
-    await Utilities.sleep(5000);
+    // await Utilities.sleep(5000);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 0);
+    await Utilities.sleep(1500);
+    ThingyService.playSound(match, 1);
 
     let _waiting = false;
     let choosenColor = randomColors.pop();
@@ -99,34 +105,28 @@ async function start(match) {
             const diff = process.hrtime(_time);
             const timeInMilliseconds = (diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS;
             const playerName = playerColor.get(choosenColor);
+            // set the points
             pointsPlayer.set(playerName, pointsPlayer.get(playerName) + Math.round(100000 / timeInMilliseconds));
+            match.players.forEach((player) => {
+                if (player.name === playerName) {
+                    player.score = pointsPlayer.get(playerName);
+                }
+            });
+            await Match.MODEL.findOneAndUpdate({ _id: match._id }, { players: match.players });
 
-            try {
-                // websocket: notification to users connected to the match with actual points of the player
-                const msg = { msg: 'points', player: playerName, points: pointsPlayer.get(playerName) };
-                websocket.ws.server.clients.forEach((user) => {
-                    if (user._id === match.code) {
-                        user.send(JSON.stringify(msg));
-                    }
-                });
-            } catch (err) {
-                console.log(err);
-            }
+            // Notify the points to the clients
+            Wss.tapGamePointsNotification(playerName, pointsPlayer.get(playerName), match.code);
 
             // END
             if (randomColors.length === 0) {
-                client.unsubscribe(buttonSubscription);
-                console.log(pointsPlayer);
-                // change state of the match
-                await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
-                client.publish(ledPublish, configThingy.colors.favorite);
-                // -----------------GAME ENDS HERE----------------------
+                ThingyService.playSound(match, 2);
+                stop(match);
             } else {
-                client.publish(ledPublish, configThingy.colors.none);
+                client.publish(ledPublish, `1,${configThingy.systemColors.none}`);
                 await Utilities.sleep(2000);
                 // when the color is randomly selected, remove it from the array
                 choosenColor = randomColors.pop();
-                client.publish(ledPublish, choosenColor);
+                client.publish(ledPublish, `1,${choosenColor}`);
                 _time = process.hrtime();
                 _waiting = true;
             }
@@ -134,9 +134,22 @@ async function start(match) {
     });
 
     // when the color is randomly selected, remove it from the array
-    client.publish(ledPublish, choosenColor);
+    client.publish(ledPublish, `1,${choosenColor}`);
     _waiting = true;
     _time = process.hrtime();
+}
+
+async function endMatch(match) {
+    // send stop message to everyone in the match
+    await createHighscoreRecords(match);
+    Wss.stopBroadcast(match.code);
+    // change state to finished
+    await Match.MODEL.findOneAndUpdate(
+        { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+        { state: Match.STATE_FINISHED },
+    );
+    // unlock thingy
+    await ThingyService.unlock(match.thingys[0]._id, match.owner);
 }
 
 async function stop(match) {
@@ -145,10 +158,29 @@ async function stop(match) {
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: {$in: [Match.STATE_CREATED, Match.STATE_RUNNING]}}, { state: Match.STATE_FINISHED });
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
-    client.publish(ledPublish, configThingy.colors.favorite);
+    client.publish(ledPublish, `1,${configThingy.systemColors.idle}`);
+
+    endMatch(match);
+}
+
+async function createHighscoreRecords(match) {
+    const highScoreRecords = [];
+    match.players.forEach((player) => {
+        // Store highscore only for players with user account
+        if (player.user === null || player.user === undefined) {
+            return;
+        }
+
+        const highScoreRecord = new HighScore();
+        highScoreRecord.gameKey = match.gameKey;
+        highScoreRecord.match = match;
+        highScoreRecord.user = player.user;
+        highScoreRecord.score = parseInt(player.score, 10);
+        highScoreRecords.push(highScoreRecord);
+    });
+    await HighScore.insertMany(highScoreRecords);
 }
 
 module.exports = {

@@ -1,14 +1,20 @@
 // Special model: Not persisted in database
 
 const TAP_GAME = 'tap-game';
+const TAP_GAME_TITLE = 'Tap Game';
+
 const HIDE_AND_SEEK = 'hide-and-seek';
+const HIDE_AND_SEEK_TITLE = 'Hide and Seek';
+
 const DEMO = 'demo';
+const DEMO_TITLE = 'Demo';
+
 const GAME_KEYS = [TAP_GAME, HIDE_AND_SEEK, DEMO];
 
 const GAMES = [
     {
         key: TAP_GAME,
-        title: 'Tap Game',
+        title: TAP_GAME_TITLE,
         description: 'This is an interactive game to test your reaction time and for having fun with your '
         + 'friends. The goal is to tap the THINGY as fast as possible once it is your turn.\n\nFor this purpose, '
         + 'a colour is assigned to each player. The players then sit or stand (or lay) around the THINGY and as '
@@ -18,7 +24,7 @@ const GAMES = [
     },
     {
         key: HIDE_AND_SEEK,
-        title: 'Hide and seek',
+        title: HIDE_AND_SEEK_TITLE,
         description: 'This is the ultimate team hide and seek. The players are grouped into two teams, a '
         + '"Hiders" and a "Seakers". As the name states, the goal for the "Hiders" is to find the "Seakers" '
         + 'and the "Seakers" try to avoid this.\n\nThe "Hiders" receive an advance of 5min to hide. Once this '
@@ -30,12 +36,19 @@ const GAMES = [
     },
     {
         key: DEMO,
-        title: 'Demo',
+        title: DEMO_TITLE,
         description: 'This is a demo for for the first version of the Thingy project.',
         icon: 'game',
     },
 ];
 
 module.exports = {
-    TAP_GAME, HIDE_AND_SEEK, DEMO, GAME_KEYS, GAMES,
+    TAP_GAME,
+    TAP_GAME_TITLE,
+    HIDE_AND_SEEK,
+    HIDE_AND_SEEK_TITLE,
+    DEMO,
+    DEMO_TITLE,
+    GAME_KEYS,
+    GAMES,
 };
