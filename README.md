@@ -1,6 +1,6 @@
 # thingy-api-blue
 
-[![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=develop)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
+[![Build Status](https://travis-ci.com/ASE2019-Blue/thingy-api-blue.svg?branch=master)](https://travis-ci.com/ASE2019-Blue/thingy-api-blue)
 
 ## Setup
 
