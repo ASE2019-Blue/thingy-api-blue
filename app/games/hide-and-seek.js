@@ -1,5 +1,7 @@
 const Wss = require('../websocket');
+const Match = require('../models/match-model');
 const HighScore = require('../models/highscore-model');
+const ThingyService = require('../services/thingy-service');
 
 async function createTeams(match) {
     const users = [];

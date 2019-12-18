@@ -44,7 +44,7 @@ function recordThingyConnectionStatus() {
 
 async function lock(thingyId, username) {
     const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
-    if(thingy != null) {
+    if (thingy != null) {
         _unsubscribe(thingy);
         return true;
     }
@@ -53,7 +53,7 @@ async function lock(thingyId, username) {
 
 async function unlock(thingyId, username) {
     const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
-    if(thingy != null) {
+    if (thingy != null) {
         _unsubscribe(thingy);
         return true;
     }
@@ -70,5 +70,5 @@ function _unsubscribe(thingy) {
 module.exports = {
     recordThingyConnectionStatus,
     lock,
-    unlock
+    unlock,
 };

@@ -4,6 +4,7 @@ const HighScore = require('../models/highscore-model');
 const Utilities = require('../services/utility-service');
 const configThingy = require('../config-thingy');
 const Wss = require('../websocket');
+const ThingyService = require('../services/thingy-service');
 
 const NS_PER_SEC = 1e9;
 const MS_PER_NS = 1e-6;
@@ -74,7 +75,7 @@ async function start(match) {
     }
     // shuffle the array
     shuffle(randomColors);
-    
+
     // -----------------END OF CONFIG------------------------
 
 
@@ -152,7 +153,7 @@ async function stop(match) {
     // To be sure to publish after last change of change colour
     await Utilities.sleep(2000);
     client.publish(ledPublish, `1,${configThingy.systemColors.idle}`);
-    
+
     endMatch(match);
 }
 
