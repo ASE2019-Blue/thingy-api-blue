@@ -1,5 +1,6 @@
 const Mqtt = require('../mqtt');
 const Thingy = require('../models/thingy-model');
+const configThingy = require('../config-thingy');
 
 /**
  * Listens to the connection status of the Thingies. When true, the Thingy just connected,
@@ -43,12 +44,27 @@ function recordThingyConnectionStatus() {
 
 async function lock(thingyId, username) {
     const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: null }, { lockedForUser: username });
-    return thingy != null;
+    if(thingy != null) {
+        _unsubscribe(thingy);
+        return true;
+    }
+    return false;
 }
 
 async function unlock(thingyId, username) {
     const thingy = await Thingy.findOneAndUpdate({ _id: thingyId, lockedForUser: username }, { lockedForUser: null });
+    if(thingy != null) {
+        _unsubscribe(thingy);
+        return true;
+    }
     return thingy != null;
+}
+
+function _unsubscribe(thingy) {
+    const thingyURI = thingy.macAddress;
+    const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
+    const { client } = Mqtt;
+    client.unsubscribe(buttonSubscription);
 }
 
 module.exports = {
