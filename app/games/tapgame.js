@@ -74,8 +74,7 @@ async function start(match) {
     }
     // shuffle the array
     shuffle(randomColors);
-
-    await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
+    
     // -----------------END OF CONFIG------------------------
 
 
@@ -112,13 +111,7 @@ async function start(match) {
 
             // END
             if (randomColors.length === 0) {
-                client.unsubscribe(buttonSubscription);
-                console.log(pointsPlayer);
-                // change state of the match
-                await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_RUNNING }, { state: Match.STATE_FINISHED });
-                Wss.stopBroadcast(match.code);
-                client.publish(ledPublish, `1,${configThingy.systemColors.idle}`);
-                // -----------------GAME ENDS HERE----------------------
+                stop(match);
             } else {
                 client.publish(ledPublish, `1,${configThingy.systemColors.none}`);
                 await Utilities.sleep(2000);
@@ -137,17 +130,33 @@ async function start(match) {
     _time = process.hrtime();
 }
 
+async function endMatch(match) {
+    // send stop message to everyone in the match
+    await createHighscoreRecords(match);
+    Wss.stopBroadcast(match.code);
+    // change state to finished
+    await Match.MODEL.findOneAndUpdate(
+        { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+        { state: Match.STATE_FINISHED },
+    );
+    // unlock thingy
+    await ThingyService.unlock(match.thingys[0]._id, match.owner);
+}
+
 async function stop(match) {
     const thingyURI = match.thingys[0].macAddress;
     const buttonSubscription = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.button}`;
     const ledPublish = `${thingyURI}/${configThingy.config.services.userInterface}/${configThingy.config.characteristics.led}/Set`;
     const { client } = mqtt;
     client.unsubscribe(buttonSubscription);
-    await Match.MODEL.findOneAndUpdate(
-        { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
-        { state: Match.STATE_FINISHED },
-    );
+    // To be sure to publish after last change of change colour
+    await Utilities.sleep(2000);
+    client.publish(ledPublish, `1,${configThingy.systemColors.idle}`);
+    
+    endMatch(match);
+}
 
+async function createHighscoreRecords(match) {
     const highScoreRecords = [];
     match.players.forEach((player) => {
         // Store highscore only for players with user account
@@ -163,10 +172,6 @@ async function stop(match) {
         highScoreRecords.push(highScoreRecord);
     });
     await HighScore.insertMany(highScoreRecords);
-
-    // To be sure to publish after last change of change colour
-    await Utilities.sleep(2000);
-    client.publish(ledPublish, `1,${configThingy.systemColors.idle}`);
 }
 
 module.exports = {

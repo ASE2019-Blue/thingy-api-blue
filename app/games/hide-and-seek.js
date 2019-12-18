@@ -90,15 +90,22 @@ function isValidLocationRequestResponse(matchCode, requestId) {
 }
 
 async function endMatch(match) {
+    // send stop message to everyone in the match
     await createHighscoreRecords(match);
     Wss.stopBroadcast(match.code);
+    // change state to finished
+    await Match.MODEL.findOneAndUpdate(
+        { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
+        { state: Match.STATE_FINISHED },
+    );
+    // unlock thingy
+    await ThingyService.unlock(match.thingys[0]._id, match.owner);
 }
 
 async function stop(match) {
     clearInterval(intervals[match.code]);
     delete intervals[match.code];
-    await createHighscoreRecords(match);
-    Wss.stopBroadcast(match.code);
+    endMatch(match);
 }
 
 async function createHighscoreRecords(match) {

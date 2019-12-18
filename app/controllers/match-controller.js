@@ -61,18 +61,15 @@ async function changeStatus(ctx, next) {
         case Match.STATE_CANCELLED:
             // send cancelled message to everyone in the match
             Wss.cancelBroadcast(code);
-            // For each game add a test on gameKey and launch the corresponding one
-            if (gameKey === Game.TAP_GAME) {
-                await Match.MODEL.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED }, { state: Match.STATE_CANCELLED });
-            } else if (gameKey === Game.HIDE_AND_SEEK) {
-                // Hideandseek
-            }
+            // change state to cancelled
+            await Match.MODEL.findOneAndUpdate({ _id: matchId, state: Match.STATE_CREATED }, { state: Match.STATE_CANCELLED });
+            // unlock thingy
             await ThingyService.unlock(match.thingys[0]._id, match.owner);
             break;
         case Match.STATE_RUNNING:
+            // change state to running
+            await Match.MODEL.findOneAndUpdate({ _id: match._id, state: Match.STATE_CREATED }, { state: Match.STATE_RUNNING });
             if (gameKey === Game.HIDE_AND_SEEK) {
-                // TODO: remove (only for debug)
-                // await Hideandseek.createTeamsDebug(match,ctx.state.user.username);
                 const couldCreateTeams = await Hideandseek.createTeams(match);
                 if (!couldCreateTeams) {
                     ctx.throw(400, 'Need at least two users');
@@ -88,22 +85,11 @@ async function changeStatus(ctx, next) {
             }
             break;
         case Match.STATE_FINISHED:
-            // send stop message to everyone in the match
-            Wss.stopBroadcast(code);
-            // For each game add a test on gameKey and launch the corresponding one
             if (gameKey === Game.TAP_GAME) {
                 Tapgame.stop(match);
             } else if (gameKey === Game.HIDE_AND_SEEK) {
                 Hideandseek.stop(match);
             }
-            await ThingyService.unlock(match.thingys[0]._id, match.owner);
-            break;
-        case Match.STATE_CANCELED:
-            await Match.MODEL.findOneAndUpdate(
-                { _id: match._id, state: { $in: [Match.STATE_CREATED, Match.STATE_RUNNING] } },
-                { state: Match.STATE_CANCELED },
-            );
-            await ThingyService.unlock(match.thingys[0]._id, match.owner);
             break;
         default:
         }
